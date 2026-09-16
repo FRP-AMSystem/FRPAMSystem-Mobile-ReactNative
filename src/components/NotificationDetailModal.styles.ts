@@ -1,0 +1,141 @@
+import { StyleSheet, Dimensions } from "react-native";
+import { Colors } from "../constants/colors";
+
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+export const styles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(15, 23, 42, 0.6)",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  cardContainer: {
+    backgroundColor: "#ffffff",
+    borderRadius: 20,
+    width: "100%",
+    maxWidth: 500,
+    maxHeight: SCREEN_HEIGHT * 0.8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 12,
+    overflow: "hidden",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
+  },
+  categoryIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  headerTextGroup: {
+    flex: 1,
+  },
+  categoryLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.3,
+  },
+  timeText: {
+    fontSize: 11,
+    color: "#94a3b8",
+    marginTop: 2,
+  },
+  closeBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#f1f5f9",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  body: {
+    padding: 16,
+  },
+  title: {
+    fontSize: 16.5,
+    fontWeight: "800",
+    color: "#0f172a",
+    lineHeight: 22,
+    marginBottom: 12,
+  },
+  messageBox: {
+    backgroundColor: "#f8fafc",
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  message: {
+    fontSize: 14,
+    color: "#334155",
+    lineHeight: 22,
+  },
+  refBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "#f0fdf4",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: "#bbf7d0",
+  },
+  refLabel: {
+    fontSize: 12,
+    color: "#166534",
+    fontWeight: "600",
+  },
+  refValue: {
+    fontSize: 12,
+    color: "#15803d",
+    fontWeight: "700",
+  },
+  footer: {
+    flexDirection: "column",
+    gap: 8,
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#f1f5f9",
+    backgroundColor: "#ffffff",
+  },
+  primaryBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.primary,
+    paddingVertical: 12,
+    borderRadius: 10,
+  },
+  primaryBtnText: {
+    fontSize: 13.5,
+    fontWeight: "700",
+    color: "#ffffff",
+  },
+  secondaryBtn: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f1f5f9",
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  secondaryBtnText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#475569",
+  },
+});

@@ -1,0 +1,115 @@
+import { StyleSheet } from "react-native";
+import { Colors } from "../constants/colors";
+
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  header: {
+    padding: 16,
+    backgroundColor: "#ffffff",
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: Colors.text,
+  },
+  content: {
+    padding: 16,
+  },
+  userCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    padding: 20,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: Colors.border,
+    marginBottom: 16,
+  },
+  avatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: Colors.primaryLight,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  avatarText: {
+    fontSize: 26,
+    fontWeight: "800",
+    color: Colors.primaryDark,
+  },
+  userName: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: Colors.text,
+  },
+  userEmail: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    marginTop: 2,
+    marginBottom: 10,
+  },
+  roleBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.primaryLight,
+    borderColor: Colors.primaryBorder,
+    borderWidth: 1,
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    gap: 6,
+  },
+  roleBadgeText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: Colors.primaryDark,
+  },
+  infoSection: {
+    backgroundColor: "#ffffff",
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    marginBottom: 20,
+    gap: 12,
+  },
+  infoItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  infoLabel: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+  },
+  infoValue: {
+    fontSize: 13.5,
+    fontWeight: "600",
+    color: Colors.text,
+    marginLeft: "auto",
+  },
+  logoutBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fef2f2",
+    borderColor: "#fca5a5",
+    borderWidth: 1,
+    height: 48,
+    borderRadius: 12,
+    gap: 8,
+  },
+  logoutBtnText: {
+    fontSize: 14.5,
+    fontWeight: "700",
+    color: "#b91c1c",
+  },
+});

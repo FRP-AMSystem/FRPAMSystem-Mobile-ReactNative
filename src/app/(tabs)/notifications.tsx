@@ -13,10 +13,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { getNotifications, markAsRead, markAllAsRead } from "../../api/notificationApi";
 import { getScheduleById } from "../../api/scheduleApi";
+import { getExperimentById } from "../../api/experimentApi";
+import { getAllocationPlanById } from "../../api/allocationPlanApi";
 import { NotificationItem } from "../../types/notification";
 import { ScheduleItem } from "../../types/schedule";
+import { ExperimentItem } from "../../types/experiment";
+import { AllocationPlanItem } from "../../types/allocationPlan";
 import { Colors } from "../../constants/colors";
 import { ScheduleDetailModal } from "../../components/ScheduleDetailModal";
+import { ExperimentDetailModal } from "../../components/ExperimentDetailModal";
+import { AllocationPlanDetailModal } from "../../components/AllocationPlanDetailModal";
 import { NotificationDetailModal } from "../../components/NotificationDetailModal";
 import { styles } from "../../styles/notifications.styles";
 
@@ -57,7 +63,7 @@ function getNotificationVisuals(item: NotificationItem) {
       badgeBorder: "#e9d5ff",
     };
   }
-  if (type.includes("Equipment") || refType.includes("Equipment")) {
+  if (type.includes("Equipment") || refType?.includes("Equipment")) {
     return {
       categoryLabel: "Bàn giao Thiết bị",
       icon: "construct" as const,
@@ -69,6 +75,7 @@ function getNotificationVisuals(item: NotificationItem) {
     };
   }
   return {
+    label: "Thông báo Hệ thống",
     categoryLabel: "Thông báo Hệ thống",
     icon: "notifications" as const,
     iconColor: "#475569",
@@ -90,6 +97,15 @@ export default function NotificationsScreen() {
   const [scheduleModalVisible, setScheduleModalVisible] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState<ScheduleItem | null>(null);
   const [scheduleLoading, setScheduleLoading] = useState(false);
+
+  // Selected experiment modal state
+  const [expModalVisible, setExpModalVisible] = useState(false);
+  const [selectedExp, setSelectedExp] = useState<ExperimentItem | null>(null);
+
+  // Selected allocation plan modal state
+  const [planModalVisible, setPlanModalVisible] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<AllocationPlanItem | null>(null);
+  const [planLoading, setPlanLoading] = useState(false);
 
   // Selected general notification modal state
   const [generalModalVisible, setGeneralModalVisible] = useState(false);
@@ -147,6 +163,35 @@ export default function NotificationsScreen() {
     }
   };
 
+  const handleOpenExperimentDetail = async (experimentId: number) => {
+    try {
+      setSelectedExp(null);
+      setExpModalVisible(true);
+      const exp = await getExperimentById(experimentId);
+      setSelectedExp(exp);
+    } catch (err: any) {
+      console.error("Fetch experiment error:", err);
+      Alert.alert("Lỗi", "Không thể tải chi tiết đề tài nghiên cứu này.");
+      setExpModalVisible(false);
+    }
+  };
+
+  const handleOpenAllocationPlanDetail = async (planId: number) => {
+    try {
+      setSelectedPlan(null);
+      setPlanLoading(true);
+      setPlanModalVisible(true);
+      const plan = await getAllocationPlanById(planId);
+      setSelectedPlan(plan);
+    } catch (err: any) {
+      console.error("Fetch plan error:", err);
+      Alert.alert("Lỗi", "Không thể tải chi tiết kế hoạch phân bổ này.");
+      setPlanModalVisible(false);
+    } finally {
+      setPlanLoading(false);
+    }
+  };
+
   const handlePressItem = async (item: NotificationItem) => {
     // 1. Mark as read if unread
     if (!item.isRead) {
@@ -162,9 +207,13 @@ export default function NotificationsScreen() {
       }
     }
 
-    // 2. Open detail view
+    // 2. Open direct detail view if referenceId exists
     if (item.referenceType === "Schedule" && item.referenceId) {
       await handleOpenScheduleDetail(item.referenceId);
+    } else if (item.referenceType === "Experiment" && item.referenceId) {
+      await handleOpenExperimentDetail(item.referenceId);
+    } else if (item.referenceType === "AllocationPlan" && item.referenceId) {
+      await handleOpenAllocationPlanDetail(item.referenceId);
     } else {
       setSelectedNotification(item);
       setGeneralModalVisible(true);
@@ -183,7 +232,7 @@ export default function NotificationsScreen() {
       <View style={styles.header}>
         <View style={styles.headerTextGroup}>
           <Text style={styles.title}>Thông báo hệ thống</Text>
-          <Text style={styles.subtitle}>Cập nhật điều phối ca trực và bàn giao thiết bị</Text>
+          <Text style={styles.subtitle}>Cập nhật điều phối ca trực và đề tài lâm nghiệp</Text>
         </View>
 
         {unreadCount > 0 ? (
@@ -217,7 +266,7 @@ export default function NotificationsScreen() {
             <Ionicons name="notifications-off-outline" size={36} color={Colors.textMuted} />
           </View>
           <Text style={styles.emptyTitle}>Chưa có thông báo nào</Text>
-          <Text style={styles.emptyText}>Các cập nhật ca trực và nhiệm vụ sẽ xuất hiện tại đây.</Text>
+          <Text style={styles.emptyText}>Các cập nhật đề tài và nhiệm vụ sẽ xuất hiện tại đây.</Text>
         </View>
       ) : (
         <FlatList
@@ -227,7 +276,7 @@ export default function NotificationsScreen() {
           contentContainerStyle={styles.list}
           renderItem={({ item }) => {
             const visuals = getNotificationVisuals(item);
-            const isSchedule = item.referenceType === "Schedule" && item.referenceId;
+            const hasDirectLink = !!(item.referenceType && item.referenceId);
 
             return (
               <TouchableOpacity
@@ -281,10 +330,10 @@ export default function NotificationsScreen() {
                   </Text>
 
                   {/* Direct Action Hint */}
-                  {isSchedule ? (
+                  {hasDirectLink ? (
                     <View style={styles.actionHintRow}>
                       <Ionicons name="arrow-forward-circle-outline" size={14} color={Colors.primary} />
-                      <Text style={styles.actionHintText}>Bấm để xem chi tiết ca trực</Text>
+                      <Text style={styles.actionHintText}>Bấm để xem chi tiết hạng mục</Text>
                     </View>
                   ) : null}
                 </View>
@@ -294,7 +343,7 @@ export default function NotificationsScreen() {
         />
       )}
 
-      {/* 1. Rich Domain Schedule Detail Modal */}
+      {/* 1. Schedule Detail Modal */}
       <ScheduleDetailModal
         visible={scheduleModalVisible}
         schedule={selectedSchedule}
@@ -303,12 +352,30 @@ export default function NotificationsScreen() {
         onNavigateToCalendar={handleNavigateToCalendar}
       />
 
-      {/* 2. General Notification Detail Modal */}
+      {/* 2. Experiment Detail Modal */}
+      <ExperimentDetailModal
+        visible={expModalVisible}
+        experiment={selectedExp}
+        onClose={() => setExpModalVisible(false)}
+        onSuccess={loadData}
+      />
+
+      {/* 3. Allocation Plan Detail Modal */}
+      <AllocationPlanDetailModal
+        visible={planModalVisible}
+        plan={selectedPlan}
+        loading={planLoading}
+        onClose={() => setPlanModalVisible(false)}
+      />
+
+      {/* 4. General Notification Detail Modal */}
       <NotificationDetailModal
         visible={generalModalVisible}
         notification={selectedNotification}
         onClose={() => setGeneralModalVisible(false)}
         onOpenSchedule={handleOpenScheduleDetail}
+        onOpenExperiment={handleOpenExperimentDetail}
+        onOpenAllocationPlan={handleOpenAllocationPlanDetail}
       />
     </SafeAreaView>
   );

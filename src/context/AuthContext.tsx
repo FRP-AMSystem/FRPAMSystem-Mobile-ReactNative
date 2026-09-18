@@ -10,6 +10,9 @@ interface AuthContextType {
   role: Role | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isAdmin: boolean;
+  isManager: boolean;
+  isResearcher: boolean;
   isFieldStaff: boolean;
   loginUser: (token: string, user: UserData) => Promise<{ success: boolean; message?: string }>;
   logoutUser: () => Promise<void>;
@@ -77,7 +80,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const isAuthenticated = !!token;
-  const isFieldStaff = !!role && ALLOWED_MOBILE_ROLES.includes(role);
+  const isAdmin = !!role && (role === "Admin" || role === "SystemAdmin");
+  const isManager = role === "Manager";
+  const isResearcher = role === "Researcher";
+  const isFieldStaff = !!role && ["Technician", "Seasonal", "Student"].includes(role);
 
   return (
     <AuthContext.Provider
@@ -87,6 +93,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role,
         isLoading,
         isAuthenticated,
+        isAdmin,
+        isManager,
+        isResearcher,
         isFieldStaff,
         loginUser,
         logoutUser,

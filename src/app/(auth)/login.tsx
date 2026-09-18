@@ -51,7 +51,16 @@ export default function LoginScreen() {
         return;
       }
 
-      router.replace("/(tabs)/equipment");
+      const roleName = res.user.roleName;
+      if (roleName === "Admin" || roleName === "SystemAdmin") {
+        router.replace("/(tabs)/admin-users");
+      } else if (roleName === "Manager") {
+        router.replace("/(tabs)/dashboard");
+      } else if (roleName === "Researcher") {
+        router.replace("/(tabs)/experiments");
+      } else {
+        router.replace("/(tabs)/equipment");
+      }
     } catch (err: any) {
       console.error(err);
       setError(
@@ -61,12 +70,6 @@ export default function LoginScreen() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const fillAccount = (u: string) => {
-    setUsername(u);
-    setPassword("Forestry@2026");
-    setError("");
   };
 
   return (
@@ -85,16 +88,13 @@ export default function LoginScreen() {
             <Text style={styles.brandSubtitle}>
               Hệ thống Quản lý Tài nguyên Hiện trường Lâm nghiệp
             </Text>
-            <View style={styles.roleTag}>
-              <Text style={styles.roleTagText}>DÀNH CHO KỸ THUẬT VIÊN & THỜI VỤ</Text>
-            </View>
           </View>
 
           {/* Card Form */}
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Đăng nhập tác nghiệp</Text>
+            <Text style={styles.cardTitle}>Đăng nhập hệ thống</Text>
             <Text style={styles.cardDesc}>
-              Sử dụng tài khoản hệ thống để tiếp nhận và bàn giao thiết bị
+              Sử dụng tài khoản được cấp để truy cập hệ thống FRPAM
             </Text>
 
             {error ? (
@@ -111,7 +111,7 @@ export default function LoginScreen() {
                 <Ionicons name="person-outline" size={20} color={Colors.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="tech.bac hoặc seasonal.thinh"
+                  placeholder="Nhập tên đăng nhập hoặc email"
                   placeholderTextColor="#94a3b8"
                   autoCapitalize="none"
                   value={username}
@@ -168,28 +168,6 @@ export default function LoginScreen() {
                 </>
               )}
             </TouchableOpacity>
-
-            {/* Quick Fill Test Accounts */}
-            <View style={styles.quickFillSection}>
-              <Text style={styles.quickFillTitle}>Tài khoản thử nghiệm nhanh (Mật khẩu: Forestry@2026)</Text>
-              <View style={styles.quickFillRow}>
-                <TouchableOpacity
-                  style={styles.quickFillBadge}
-                  onPress={() => fillAccount("tech.bac")}
-                >
-                  <Ionicons name="flash-outline" size={14} color={Colors.primaryDark} />
-                  <Text style={styles.quickFillText}>Kỹ thuật viên: tech.bac (Đỗ Xuân Bắc)</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.quickFillBadge}
-                  onPress={() => fillAccount("seasonal.thinh")}
-                >
-                  <Ionicons name="flash-outline" size={14} color={Colors.primaryDark} />
-                  <Text style={styles.quickFillText}>Thời vụ: seasonal.thinh (Hoàng Văn Thịnh)</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
           </View>
 
           <Text style={styles.footerNote}>

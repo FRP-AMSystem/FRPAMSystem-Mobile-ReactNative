@@ -1,5 +1,6 @@
 export type Role =
   | "Admin"
+  | "SystemAdmin"
   | "Manager"
   | "Researcher"
   | "Technician"

@@ -7,19 +7,25 @@ import { styles } from "../styles/index.styles";
 
 export default function Index() {
   const router = useRouter();
-  const { isAuthenticated, isLoading, isFieldStaff } = useAuth();
+  const { isAuthenticated, isLoading, isAdmin, isManager, isResearcher, isFieldStaff } = useAuth();
 
   useEffect(() => {
     if (isLoading) return;
 
     if (!isAuthenticated) {
       router.replace("/(auth)/login");
+    } else if (isAdmin) {
+      router.replace("/(tabs)/admin-users");
+    } else if (isManager) {
+      router.replace("/(tabs)/dashboard");
+    } else if (isResearcher) {
+      router.replace("/(tabs)/experiments");
     } else if (isFieldStaff) {
       router.replace("/(tabs)/equipment");
     } else {
       router.replace("/(auth)/login");
     }
-  }, [isLoading, isAuthenticated, isFieldStaff]);
+  }, [isLoading, isAuthenticated, isAdmin, isManager, isResearcher, isFieldStaff]);
 
   return (
     <View style={styles.container}>

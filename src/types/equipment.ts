@@ -38,3 +38,26 @@ export interface AllocationEquipmentDetail {
   createdAt?: string | null;
   updatedAt?: string | null;
 }
+
+export interface EquipmentItem {
+  equipmentId: number;
+  equipmentCode?: string;
+  equipmentName: string;
+  typeName?: string;
+  typeId?: number;
+  status?: string;
+  efficiencyScore?: number;
+  maintenanceStatus?: string;
+  serialNumber?: string;
+  createdAt?: string;
+}
+
+export interface EquipmentRequest {
+  equipmentName: string;
+  equipmentCode: string;
+  equipmentTypeId: number;
+  status?: string;
+  efficiencyScore?: number;
+  maintenanceStatus?: string;
+  serialNumber?: string;
+}

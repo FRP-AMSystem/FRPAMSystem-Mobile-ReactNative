@@ -1,0 +1,163 @@
+import { StyleSheet } from "react-native";
+import { Colors } from "../constants/colors";
+
+export const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(15, 23, 42, 0.65)",
+    justifyContent: "flex-end",
+  },
+  backdropTouchable: {
+    flex: 1,
+  },
+  modalContent: {
+    backgroundColor: "#ffffff",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 28,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 10,
+  },
+  dragHandle: {
+    width: 44,
+    height: 5,
+    backgroundColor: "#cbd5e1",
+    borderRadius: 3,
+    alignSelf: "center",
+    marginBottom: 16,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  iconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#fee2e2",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  headerTextWrap: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#991b1b",
+  },
+  subtitle: {
+    fontSize: 13,
+    color: Colors.textMuted,
+    marginTop: 2,
+  },
+  closeBtn: {
+    padding: 4,
+  },
+  targetBox: {
+    backgroundColor: "#f8fafc",
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    marginBottom: 16,
+  },
+  targetLabel: {
+    fontSize: 12,
+    color: Colors.textMuted,
+    fontWeight: "500",
+    marginBottom: 4,
+  },
+  targetTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: Colors.text,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: Colors.text,
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: "#f8fafc",
+    borderWidth: 1,
+    borderColor: "#cbd5e1",
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 14,
+    color: Colors.text,
+    minHeight: 110,
+    textAlignVertical: "top",
+    marginBottom: 16,
+  },
+  quickReasonsContainer: {
+    marginBottom: 16,
+  },
+  quickLabel: {
+    fontSize: 12,
+    color: Colors.textMuted,
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+  quickPillsWrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  quickPill: {
+    backgroundColor: "#f1f5f9",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  quickPillText: {
+    fontSize: 12,
+    color: Colors.text,
+  },
+  actions: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 8,
+  },
+  cancelBtn: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: "#f1f5f9",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cancelBtnText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: Colors.textMuted,
+  },
+  confirmBtn: {
+    flex: 1.4,
+    flexDirection: "row",
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: "#dc2626",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  confirmBtnDisabled: {
+    opacity: 0.6,
+  },
+  confirmBtnText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#ffffff",
+  },
+});

@@ -15,6 +15,8 @@ interface NotificationDetailModalProps {
   notification: NotificationItem | null;
   onClose: () => void;
   onOpenSchedule?: (scheduleId: number) => void;
+  onOpenExperiment?: (experimentId: number) => void;
+  onOpenAllocationPlan?: (planId: number) => void;
 }
 
 function formatDate(dateStr?: string | null): string {
@@ -33,7 +35,9 @@ function formatDate(dateStr?: string | null): string {
 
 function getNotificationCategory(item: NotificationItem | null) {
   const type = item?.notificationType || "";
-  if (type.includes("Schedule") || item?.referenceType === "Schedule") {
+  const refType = item?.referenceType || "";
+
+  if (type.includes("Schedule") || refType === "Schedule") {
     return {
       label: "Lịch Ca trực & Phân công",
       icon: "calendar" as const,
@@ -42,7 +46,7 @@ function getNotificationCategory(item: NotificationItem | null) {
       refName: "Ca trực hiện trường",
     };
   }
-  if (type.includes("Experiment") || item?.referenceType === "Experiment") {
+  if (type.includes("Experiment") || refType === "Experiment") {
     return {
       label: "Đề tài & Kế hoạch Thử nghiệm",
       icon: "flask" as const,
@@ -51,7 +55,7 @@ function getNotificationCategory(item: NotificationItem | null) {
       refName: "Đề tài nghiên cứu",
     };
   }
-  if (type.includes("Allocation") || item?.referenceType === "AllocationPlan") {
+  if (type.includes("Allocation") || refType === "AllocationPlan") {
     return {
       label: "Phân bổ Tài nguyên",
       icon: "git-network" as const,
@@ -60,7 +64,7 @@ function getNotificationCategory(item: NotificationItem | null) {
       refName: "Kế hoạch điều phối",
     };
   }
-  if (type.includes("Equipment") || item?.referenceType?.includes("Equipment")) {
+  if (type.includes("Equipment") || refType?.includes("Equipment")) {
     return {
       label: "Thiết bị & Bàn giao",
       icon: "construct" as const,
@@ -83,11 +87,15 @@ export function NotificationDetailModal({
   notification,
   onClose,
   onOpenSchedule,
+  onOpenExperiment,
+  onOpenAllocationPlan,
 }: NotificationDetailModalProps) {
   if (!visible || !notification) return null;
 
   const category = getNotificationCategory(notification);
   const isScheduleRef = notification.referenceType === "Schedule" && notification.referenceId;
+  const isExperimentRef = notification.referenceType === "Experiment" && notification.referenceId;
+  const isAllocationPlanRef = notification.referenceType === "AllocationPlan" && notification.referenceId;
 
   return (
     <Modal visible={visible} animationType="fade" transparent={true} onRequestClose={onClose}>
@@ -141,6 +149,34 @@ export function NotificationDetailModal({
               >
                 <Ionicons name="eye-outline" size={16} color="#ffffff" style={{ marginRight: 6 }} />
                 <Text style={styles.primaryBtnText}>Xem Chi tiết Ca trực</Text>
+              </TouchableOpacity>
+            ) : null}
+
+            {isExperimentRef && onOpenExperiment ? (
+              <TouchableOpacity
+                style={[styles.primaryBtn, { backgroundColor: "#16a34a" }]}
+                onPress={() => {
+                  onClose();
+                  onOpenExperiment(notification.referenceId!);
+                }}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="flask-outline" size={16} color="#ffffff" style={{ marginRight: 6 }} />
+                <Text style={styles.primaryBtnText}>Xem Chi tiết Đề tài</Text>
+              </TouchableOpacity>
+            ) : null}
+
+            {isAllocationPlanRef && onOpenAllocationPlan ? (
+              <TouchableOpacity
+                style={[styles.primaryBtn, { backgroundColor: "#9333ea" }]}
+                onPress={() => {
+                  onClose();
+                  onOpenAllocationPlan(notification.referenceId!);
+                }}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="git-network-outline" size={16} color="#ffffff" style={{ marginRight: 6 }} />
+                <Text style={styles.primaryBtnText}>Xem Kế hoạch Phân bổ</Text>
               </TouchableOpacity>
             ) : null}
 

@@ -31,3 +31,14 @@ export async function getScheduleById(id: number): Promise<ScheduleItem> {
     return res.data?.data || res.data;
   }
 }
+
+export async function createSchedule(payload: Partial<ScheduleItem>): Promise<ScheduleItem> {
+  const res = await client.post("/Schedules", payload);
+  return res.data?.data || res.data;
+}
+
+export async function deleteSchedule(id: number): Promise<void> {
+  await client.delete(`/Schedules/${id}`);
+}
+
+

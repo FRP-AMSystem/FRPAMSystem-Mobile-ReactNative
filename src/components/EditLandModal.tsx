@@ -65,7 +65,7 @@ export function EditLandModal({
             setLandCode(`PLOT-${Date.now().toString().slice(-4)}`);
             setAreaId(defaultAreaId || (data.length > 0 ? data[0].areaId : 0));
             setAreaSize("200");
-            setSoilType("Đất rừng");
+            setSoilType("Forest soil");
             setLocation("");
             setStatus("Available");
           }
@@ -76,12 +76,12 @@ export function EditLandModal({
 
   const handleSave = async () => {
     if (!landCode.trim()) {
-      Alert.alert("Lỗi", "Vui lòng nhập mã lô đất (Land Code).");
+      Alert.alert("Error", "Please enter the land code.");
       return;
     }
     const sizeNum = Number(areaSize);
     if (isNaN(sizeNum) || sizeNum <= 0) {
-      Alert.alert("Lỗi", "Diện tích lô đất không hợp lệ.");
+      Alert.alert("Error", "Invalid land area size.");
       return;
     }
 
@@ -91,17 +91,17 @@ export function EditLandModal({
         landCode: landCode.trim(),
         areaId: areaId || (areas.length > 0 ? areas[0].areaId : 1),
         areaSize: sizeNum,
-        soilType: soilType.trim() || "Đất rừng",
+        soilType: soilType.trim() || "Forest soil",
         location: location.trim() || undefined,
-        status,
+        status: land ? status : "Available",
       };
 
       if (land) {
         await updateLand(land.landId, payload);
-        Alert.alert("Thành công", `Đã cập nhật lô đất "${payload.landCode}"!`);
+        Alert.alert("Success", `Land plot "${payload.landCode}" has been updated!`);
       } else {
         await createLand(payload);
-        Alert.alert("Thành công", `Đã thêm mới lô đất "${payload.landCode}"!`);
+        Alert.alert("Success", `Land plot "${payload.landCode}" has been created!`);
       }
 
       onSuccess();
@@ -109,8 +109,8 @@ export function EditLandModal({
     } catch (err: any) {
       console.error("Save land error:", err);
       Alert.alert(
-        "Lỗi",
-        err?.response?.data?.message || "Không thể lưu thông tin lô đất. Vui lòng thử lại."
+        "Error",
+        err?.response?.data?.message || "Failed to save land info. Please try again."
       );
     } finally {
       setSaving(false);
@@ -135,7 +135,7 @@ export function EditLandModal({
                     {land ? "Edit Land Resource" : "Add Land Resource"}
                   </Text>
                   <Text style={styles.modalSubtitle}>
-                    {land ? land.landCode : "Thêm mới lô đất vào phân khu"}
+                    {land ? land.landCode : "Add new land plot to area"}
                   </Text>
                 </View>
                 <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.7}>
@@ -163,7 +163,7 @@ export function EditLandModal({
                 {areas.length > 0 && (
                   <View style={styles.fieldGroup}>
                     <Text style={styles.fieldLabel}>
-                      Phân khu (Area) <Text style={styles.required}>*</Text>
+                      Area <Text style={styles.required}>*</Text>
                     </Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                       <View style={styles.areaScroll}>
@@ -216,7 +216,7 @@ export function EditLandModal({
                     style={styles.input}
                     value={soilType}
                     onChangeText={setSoilType}
-                    placeholder="peat soil, Sandy Soil, Đất feralit..."
+                    placeholder="Peat soil, Sandy soil, Ferralsol..."
                     placeholderTextColor="#94a3b8"
                   />
                 </View>
@@ -228,39 +228,41 @@ export function EditLandModal({
                     style={styles.input}
                     value={location}
                     onChangeText={setLocation}
-                    placeholder="Lô Đồi Cao Số 1 - Đỉnh Đồi Cát"
+                    placeholder="e.g. Hill Plot 1 - Sand Ridge"
                     placeholderTextColor="#94a3b8"
                   />
                 </View>
 
-                {/* Status */}
-                <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>
-                    Status <Text style={styles.required}>*</Text>
-                  </Text>
-                  <View style={styles.statusGrid}>
-                    {STATUS_OPTIONS.map((opt) => {
-                      const isActive = status.toLowerCase() === opt.key.toLowerCase();
-                      return (
-                        <TouchableOpacity
-                          key={opt.key}
-                          style={[styles.statusOption, isActive && styles.statusOptionActive]}
-                          onPress={() => setStatus(opt.key)}
-                          activeOpacity={0.8}
-                        >
-                          <Text
-                            style={[
-                              styles.statusOptionText,
-                              isActive && styles.statusOptionTextActive,
-                            ]}
+                {/* Status - only shown when editing existing land */}
+                {land ? (
+                  <View style={styles.fieldGroup}>
+                    <Text style={styles.fieldLabel}>
+                      Status <Text style={styles.required}>*</Text>
+                    </Text>
+                    <View style={styles.statusGrid}>
+                      {STATUS_OPTIONS.map((opt) => {
+                        const isActive = status.toLowerCase() === opt.key.toLowerCase();
+                        return (
+                          <TouchableOpacity
+                            key={opt.key}
+                            style={[styles.statusOption, isActive && styles.statusOptionActive]}
+                            onPress={() => setStatus(opt.key)}
+                            activeOpacity={0.8}
                           >
-                            {opt.label}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
+                            <Text
+                              style={[
+                                styles.statusOptionText,
+                                isActive && styles.statusOptionTextActive,
+                              ]}
+                            >
+                              {opt.label}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
                   </View>
-                </View>
+                ) : null}
               </ScrollView>
 
               {/* Footer */}

@@ -69,7 +69,7 @@ export function ScheduleDetailModal({
     switch (status) {
       case "InProgress":
         return {
-          label: "Đang thực hiện",
+          label: "In Progress",
           bg: "#fffbeb",
           text: "#b45309",
           border: "#fde68a",
@@ -77,7 +77,7 @@ export function ScheduleDetailModal({
         };
       case "Completed":
         return {
-          label: "Đã hoàn thành",
+          label: "Completed",
           bg: "#f0fdf4",
           text: "#15803d",
           border: "#86efac",
@@ -85,7 +85,7 @@ export function ScheduleDetailModal({
         };
       case "Cancelled":
         return {
-          label: "Đã hủy bỏ",
+          label: "Cancelled",
           bg: "#fef2f2",
           text: "#b91c1c",
           border: "#fca5a5",
@@ -94,7 +94,7 @@ export function ScheduleDetailModal({
       case "Planned":
       default:
         return {
-          label: "Đã lên kế hoạch",
+          label: "Planned",
           bg: "#eff6ff",
           text: "#1d4ed8",
           border: "#bfdbfe",
@@ -106,13 +106,13 @@ export function ScheduleDetailModal({
   const getPriorityBadge = (priority?: number) => {
     switch (priority) {
       case 3:
-        return { label: "Khẩn cấp", bg: "#fee2e2", text: "#b91c1c", border: "#fca5a5" };
+        return { label: "Urgent", bg: "#fee2e2", text: "#b91c1c", border: "#fca5a5" };
       case 2:
-        return { label: "Ưu tiên Cao", bg: "#ffedd5", text: "#c2410c", border: "#fed7aa" };
+        return { label: "High", bg: "#ffedd5", text: "#c2410c", border: "#fed7aa" };
       case 1:
-        return { label: "Trung bình", bg: "#fef3c7", text: "#92400e", border: "#fde68a" };
+        return { label: "Medium", bg: "#fef3c7", text: "#92400e", border: "#fde68a" };
       default:
-        return { label: "Bình thường", bg: "#f1f5f9", text: "#475569", border: "#cbd5e1" };
+        return { label: "Normal", bg: "#f1f5f9", text: "#475569", border: "#cbd5e1" };
     }
   };
 
@@ -140,10 +140,10 @@ export function ScheduleDetailModal({
               <View style={styles.headerTitleGroup}>
                 <View style={styles.categoryPill}>
                   <Ionicons name="shield-checkmark" size={13} color={Colors.primary} />
-                  <Text style={styles.categoryPillText}>NHIỆM VỤ HIỆN TRƯỜNG</Text>
+                  <Text style={styles.categoryPillText}>FIELD MISSION</Text>
                 </View>
                 <Text style={styles.modalTitle} numberOfLines={1}>
-                  Chi tiết Ca trực
+                  Shift Details
                 </Text>
               </View>
 
@@ -157,12 +157,12 @@ export function ScheduleDetailModal({
           {loading ? (
             <View style={styles.centerLoading}>
               <ActivityIndicator size="large" color={Colors.primary} />
-              <Text style={styles.loadingText}>Đang tải chi tiết ca trực...</Text>
+              <Text style={styles.loadingText}>Loading shift details...</Text>
             </View>
           ) : !schedule ? (
             <View style={styles.centerLoading}>
               <Ionicons name="alert-circle-outline" size={48} color={Colors.textMuted} />
-              <Text style={styles.emptyText}>Không tìm thấy thông tin ca trực này.</Text>
+              <Text style={styles.emptyText}>Shift details not found.</Text>
             </View>
           ) : (
             <ScrollView
@@ -205,58 +205,58 @@ export function ScheduleDetailModal({
                 </View>
 
                 <Text style={styles.missionTitle}>
-                  {schedule.title || "Nhiệm vụ Hiện trường"}
+                  {schedule.title || "Field Mission"}
                 </Text>
               </View>
 
-              {/* 2. Dự án & Kế hoạch Phân bổ (Experiment & Allocation) */}
+              {/* 2. Experiment & Allocation */}
               <View style={styles.sectionCard}>
                 <View style={styles.sectionHeader}>
                   <View style={[styles.sectionIconBox, { backgroundColor: "#f0fdf4" }]}>
                     <Ionicons name="flask" size={16} color={Colors.primary} />
                   </View>
-                  <Text style={styles.sectionTitle}>Đề tài Thử nghiệm & Phân bổ</Text>
+                  <Text style={styles.sectionTitle}>Experiment & Resource Allocation</Text>
                 </View>
 
                 <View style={styles.fieldItem}>
-                  <Text style={styles.fieldLabel}>Đề tài Thử nghiệm</Text>
+                  <Text style={styles.fieldLabel}>Experiment</Text>
                   <Text style={styles.fieldValueBold}>
-                    {schedule.experimentName || "Đề tài Thử nghiệm Lâm nghiệp"}
+                    {schedule.experimentName || "Forestry Research Experiment"}
                   </Text>
                 </View>
 
                 <View style={styles.divider} />
 
                 <View style={styles.fieldItem}>
-                  <Text style={styles.fieldLabel}>Giai đoạn Thực hiện (Phase)</Text>
+                  <Text style={styles.fieldLabel}>Phase</Text>
                   <Text style={styles.fieldValue}>
-                    {schedule.phaseName || "Giai đoạn Hiện trường"}
+                    {schedule.phaseName || "Field Phase"}
                   </Text>
                 </View>
 
                 <View style={styles.divider} />
 
                 <View style={styles.fieldItem}>
-                  <Text style={styles.fieldLabel}>Kế hoạch Phân bổ Tài nguyên</Text>
+                  <Text style={styles.fieldLabel}>Resource Allocation Plan</Text>
                   <View style={styles.allocationRow}>
                     <Ionicons name="git-network-outline" size={15} color={Colors.textSecondary} />
                     <Text style={styles.allocationText}>
-                      {schedule.allocationPlanName || "Kế hoạch Phân bổ Tài nguyên Đã phê duyệt"}
+                      {schedule.allocationPlanName || "Approved Resource Allocation Plan"}
                     </Text>
                   </View>
                 </View>
               </View>
 
-              {/* 3. Khung thời gian & Tiến độ (Timeline) */}
+              {/* 3. Timeline */}
               <View style={styles.sectionCard}>
                 <View style={styles.sectionHeader}>
                   <View style={[styles.sectionIconBox, { backgroundColor: "#eff6ff" }]}>
                     <Ionicons name="time" size={16} color="#2563eb" />
                   </View>
                   <View style={styles.timelineHeaderRight}>
-                    <Text style={styles.sectionTitle}>Khung thời gian Thực hiện</Text>
+                    <Text style={styles.sectionTitle}>Execution Timeline</Text>
                     <View style={styles.durationPill}>
-                      <Text style={styles.durationText}>{duration} ngày</Text>
+                      <Text style={styles.durationText}>{duration} {duration === 1 ? "day" : "days"}</Text>
                     </View>
                   </View>
                 </View>
@@ -266,7 +266,7 @@ export function ScheduleDetailModal({
                   <View style={styles.timeBox}>
                     <View style={styles.timeBoxHeader}>
                       <Ionicons name="play-circle-outline" size={14} color="#16a34a" />
-                      <Text style={styles.timeBoxHeaderLabel}>BẮT ĐẦU</Text>
+                      <Text style={styles.timeBoxHeaderLabel}>START</Text>
                     </View>
                     <Text style={styles.timeDateText}>{startInfo.date}</Text>
                     <Text style={styles.timeHourText}>{startInfo.time}</Text>
@@ -281,7 +281,7 @@ export function ScheduleDetailModal({
                   <View style={styles.timeBox}>
                     <View style={styles.timeBoxHeader}>
                       <Ionicons name="flag-outline" size={14} color="#dc2626" />
-                      <Text style={styles.timeBoxHeaderLabel}>KẾT THÚC</Text>
+                      <Text style={styles.timeBoxHeaderLabel}>END</Text>
                     </View>
                     <Text style={styles.timeDateText}>{endInfo.date}</Text>
                     <Text style={styles.timeHourText}>{endInfo.time}</Text>
@@ -289,13 +289,13 @@ export function ScheduleDetailModal({
                 </View>
               </View>
 
-              {/* 4. Phân công & Nhân sự (Personnel) */}
+              {/* 4. Personnel */}
               <View style={styles.sectionCard}>
                 <View style={styles.sectionHeader}>
                   <View style={[styles.sectionIconBox, { backgroundColor: "#faf5ff" }]}>
                     <Ionicons name="people" size={16} color="#9333ea" />
                   </View>
-                  <Text style={styles.sectionTitle}>Nhân sự & Điều phối</Text>
+                  <Text style={styles.sectionTitle}>Personnel & Dispatch</Text>
                 </View>
 
                 {/* Assigned Personnel */}
@@ -306,12 +306,12 @@ export function ScheduleDetailModal({
                     </Text>
                   </View>
                   <View style={styles.personInfo}>
-                    <Text style={styles.personRoleLabel}>NHÂN SỰ PHỤ TRÁCH</Text>
+                    <Text style={styles.personRoleLabel}>ASSIGNED PERSONNEL</Text>
                     <Text style={styles.personName}>
-                      {schedule.assignedHumanResourceName || schedule.assignedToUserName || "Chưa gán"}
+                      {schedule.assignedHumanResourceName || schedule.assignedToUserName || "Unassigned"}
                     </Text>
                     <Text style={styles.personSub}>
-                      Kỹ thuật viên hiện trường (Phụ trách thi công)
+                      Field Technician (In charge of execution)
                     </Text>
                   </View>
                 </View>
@@ -326,62 +326,62 @@ export function ScheduleDetailModal({
                     </Text>
                   </View>
                   <View style={styles.personInfo}>
-                    <Text style={styles.personRoleLabel}>NGƯỜI GIAO VIỆC / ĐIỀU PHỐI</Text>
+                    <Text style={styles.personRoleLabel}>CREATOR / DISPATCHER</Text>
                     <Text style={styles.personName}>
-                      {schedule.createdByName || "Quản lý hệ thống"}
+                      {schedule.createdByName || "System Manager"}
                     </Text>
                     <Text style={styles.personSub}>
-                      Quản lý điều phối dự án
+                      Project Coordination Manager
                     </Text>
                   </View>
                 </View>
               </View>
 
-              {/* 5. Nội dung & Yêu cầu nhiệm vụ (Task Scope / Description) */}
+              {/* 5. Description */}
               <View style={styles.sectionCard}>
                 <View style={styles.sectionHeader}>
                   <View style={[styles.sectionIconBox, { backgroundColor: "#f8fafc" }]}>
                     <Ionicons name="document-text" size={16} color="#334155" />
                   </View>
-                  <Text style={styles.sectionTitle}>Mô tả Nội dung Công việc</Text>
+                  <Text style={styles.sectionTitle}>Task Scope & Description</Text>
                 </View>
 
                 <View style={styles.descBox}>
                   <Text style={styles.descContent}>
-                    {schedule.description || "Chưa có mô tả chi tiết cho nhiệm vụ này."}
+                    {schedule.description || "No detailed description for this task."}
                   </Text>
                 </View>
               </View>
 
-              {/* 6. Chỉ dẫn & Ghi chú kỹ thuật (Operational Instructions / Notes) */}
+              {/* 6. Technical Instructions */}
               <View style={[styles.sectionCard, styles.notesCard]}>
                 <View style={styles.sectionHeader}>
                   <View style={[styles.sectionIconBox, { backgroundColor: "#fef3c7" }]}>
                     <Ionicons name="bulb" size={16} color="#d97706" />
                   </View>
                   <Text style={[styles.sectionTitle, { color: "#92400e" }]}>
-                    Chỉ dẫn Kỹ thuật & Lưu ý Thực thi
+                    Technical Instructions & Operational Notes
                   </Text>
                 </View>
 
                 <View style={styles.notesBox}>
                   <Text style={styles.notesContent}>
-                    {schedule.notes || "Không có chỉ dẫn đặc biệt."}
+                    {schedule.notes || "No special instructions."}
                   </Text>
                 </View>
               </View>
 
-              {/* 7. Thông tin Nhật ký Hệ thống (Audit / Record Info) */}
+              {/* 7. Audit Log Info */}
               <View style={styles.auditCard}>
                 <View style={styles.auditRow}>
                   <Ionicons name="calendar-outline" size={13} color="#94a3b8" />
-                  <Text style={styles.auditLabel}>Thời gian tạo:</Text>
+                  <Text style={styles.auditLabel}>Created at:</Text>
                   <Text style={styles.auditValue}>{createdInfo.full}</Text>
                 </View>
                 {updatedInfo ? (
                   <View style={[styles.auditRow, { marginTop: 4 }]}>
                     <Ionicons name="sync-outline" size={13} color="#94a3b8" />
-                    <Text style={styles.auditLabel}>Cập nhật lần cuối:</Text>
+                    <Text style={styles.auditLabel}>Last updated:</Text>
                     <Text style={styles.auditValue}>{updatedInfo.full}</Text>
                   </View>
                 ) : null}
@@ -401,12 +401,12 @@ export function ScheduleDetailModal({
                 activeOpacity={0.8}
               >
                 <Ionicons name="calendar-outline" size={18} color="#ffffff" style={{ marginRight: 6 }} />
-                <Text style={styles.primaryActionText}>Xem trên Lịch công tác</Text>
+                <Text style={styles.primaryActionText}>View on Calendar</Text>
               </TouchableOpacity>
             ) : null}
 
             <TouchableOpacity style={styles.secondaryActionBtn} onPress={onClose} activeOpacity={0.8}>
-              <Text style={styles.secondaryActionText}>Đóng</Text>
+              <Text style={styles.secondaryActionText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>

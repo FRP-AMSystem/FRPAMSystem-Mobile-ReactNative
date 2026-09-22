@@ -92,9 +92,9 @@ export default function DashboardScreen() {
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <View style={styles.greetingWrap}>
-            <Text style={styles.welcomeText}>Bảng điều khiển Quản lý</Text>
+            <Text style={styles.welcomeText}>Manager Dashboard</Text>
             <Text style={styles.userName} numberOfLines={1}>
-              {user?.fullName || "Quản lý hệ thống"}
+              {user?.fullName || "System Manager"}
             </Text>
           </View>
           <View style={styles.roleBadge}>
@@ -107,7 +107,7 @@ export default function DashboardScreen() {
       {loading ? (
         <View style={styles.centerLoading}>
           <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={styles.loadingText}>Đang tải chỉ số điều hành...</Text>
+          <Text style={styles.loadingText}>Loading dashboard metrics...</Text>
         </View>
       ) : (
         <ScrollView
@@ -124,11 +124,11 @@ export default function DashboardScreen() {
         >
           {/* KPI Metrics */}
           <View style={styles.sectionTitleRow}>
-            <Text style={styles.sectionTitle}>Chỉ số Hoạt động</Text>
+            <Text style={styles.sectionTitle}>Operational KPIs</Text>
           </View>
 
           <View style={styles.metricsGrid}>
-            {/* 1. Tổng đề tài */}
+            {/* 1. Total Experiments */}
             <View style={styles.metricCard}>
               <View style={styles.metricCardHeader}>
                 <View style={[styles.metricIconBox, { backgroundColor: "#ecfdf5" }]}>
@@ -136,10 +136,10 @@ export default function DashboardScreen() {
                 </View>
                 <Text style={styles.metricValue}>{metrics?.totalExperiments || 0}</Text>
               </View>
-              <Text style={styles.metricLabel}>Tổng đề tài</Text>
+              <Text style={styles.metricLabel}>Total Experiments</Text>
             </View>
 
-            {/* 2. Đang khảo nghiệm */}
+            {/* 2. Running */}
             <View style={styles.metricCard}>
               <View style={styles.metricCardHeader}>
                 <View style={[styles.metricIconBox, { backgroundColor: "#eff6ff" }]}>
@@ -149,10 +149,10 @@ export default function DashboardScreen() {
                   {metrics?.runningExperiments || 0}
                 </Text>
               </View>
-              <Text style={styles.metricLabel}>Đang thực hiện</Text>
+              <Text style={styles.metricLabel}>In Progress</Text>
             </View>
 
-            {/* 3. Chờ thẩm định */}
+            {/* 3. Pending Review */}
             <View style={styles.metricCard}>
               <View style={styles.metricCardHeader}>
                 <View style={[styles.metricIconBox, { backgroundColor: "#fef3c7" }]}>
@@ -162,10 +162,10 @@ export default function DashboardScreen() {
                   {totalPending}
                 </Text>
               </View>
-              <Text style={styles.metricLabel}>Cần thẩm định</Text>
+              <Text style={styles.metricLabel}>Pending Review</Text>
             </View>
 
-            {/* 4. Kế hoạch phân bổ */}
+            {/* 4. Allocation Plans */}
             <View style={styles.metricCard}>
               <View style={styles.metricCardHeader}>
                 <View style={[styles.metricIconBox, { backgroundColor: "#faf5ff" }]}>
@@ -175,10 +175,10 @@ export default function DashboardScreen() {
                   {metrics?.totalAllocationPlans || 0}
                 </Text>
               </View>
-              <Text style={styles.metricLabel}>Kế hoạch phân bổ</Text>
+              <Text style={styles.metricLabel}>Allocation Plans</Text>
             </View>
 
-            {/* 5. Thiết bị vận hành */}
+            {/* 5. In-Use Equipment */}
             <View style={styles.metricCard}>
               <View style={styles.metricCardHeader}>
                 <View style={[styles.metricIconBox, { backgroundColor: "#f0fdf4" }]}>
@@ -188,10 +188,10 @@ export default function DashboardScreen() {
                   {metrics?.inUseEquipment || 0}/{metrics?.totalEquipment || 0}
                 </Text>
               </View>
-              <Text style={styles.metricLabel}>Máy đang dùng</Text>
+              <Text style={styles.metricLabel}>Active Equipment</Text>
             </View>
 
-            {/* 6. Nhân sự hiện trường */}
+            {/* 6. Total Staff */}
             <View style={styles.metricCard}>
               <View style={styles.metricCardHeader}>
                 <View style={[styles.metricIconBox, { backgroundColor: "#fdf2f8" }]}>
@@ -201,16 +201,16 @@ export default function DashboardScreen() {
                   {metrics?.totalStaff || 0}
                 </Text>
               </View>
-              <Text style={styles.metricLabel}>Tổng nhân sự</Text>
+              <Text style={styles.metricLabel}>Total Staff</Text>
             </View>
           </View>
 
           {/* Urgent Approvals Section */}
           <View style={styles.sectionTitleRow}>
-            <Text style={styles.sectionTitle}>Yêu cầu Chờ Phê duyệt</Text>
+            <Text style={styles.sectionTitle}>Pending Approvals</Text>
             {totalPending > 0 ? (
               <View style={styles.sectionBadge}>
-                <Text style={styles.sectionBadgeText}>{totalPending} mục</Text>
+                <Text style={styles.sectionBadgeText}>{totalPending} items</Text>
               </View>
             ) : null}
           </View>
@@ -220,7 +220,7 @@ export default function DashboardScreen() {
               <View style={styles.emptyUrgentCard}>
                 <Ionicons name="checkmark-done-circle" size={40} color="#16a34a" />
                 <Text style={styles.emptyUrgentText}>
-                  Tuyệt vời! Hiện không có yêu cầu nào đang chờ thẩm định.
+                  Great! No requests currently awaiting review.
                 </Text>
               </View>
             ) : (
@@ -238,10 +238,10 @@ export default function DashboardScreen() {
                   >
                     <View style={styles.urgentCardTop}>
                       <View style={styles.urgentTypePill}>
-                        <Text style={styles.urgentTypeText}>Đề tài mới</Text>
+                        <Text style={styles.urgentTypeText}>New Experiment</Text>
                       </View>
                       <Text style={styles.urgentTime}>
-                        {exp.status || "Chờ duyệt"}
+                        {exp.status || "Pending"}
                       </Text>
                     </View>
                     <Text style={styles.urgentTitle} numberOfLines={2}>
@@ -249,11 +249,11 @@ export default function DashboardScreen() {
                     </Text>
                     <View style={styles.urgentMetaRow}>
                       <Text style={styles.urgentAuthor}>
-                        Chủ nhiệm: {exp.researcherName || "Nghiên cứu viên"}
+                        Lead: {exp.researcherName || "Researcher"}
                       </Text>
                       <View style={styles.urgentActionBtn}>
                         <Ionicons name="eye-outline" size={14} color="#ffffff" />
-                        <Text style={styles.urgentActionText}>Thẩm định</Text>
+                        <Text style={styles.urgentActionText}>Review</Text>
                       </View>
                     </View>
                   </TouchableOpacity>
@@ -273,23 +273,23 @@ export default function DashboardScreen() {
                     <View style={styles.urgentCardTop}>
                       <View style={[styles.urgentTypePill, { backgroundColor: "#faf5ff" }]}>
                         <Text style={[styles.urgentTypeText, { color: "#7e22ce" }]}>
-                          Kế hoạch phân bổ
+                          Allocation Plan
                         </Text>
                       </View>
                       <Text style={styles.urgentTime}>
-                        {plan.approveStatus || "Chờ duyệt"}
+                        {plan.approveStatus || "Pending"}
                       </Text>
                     </View>
                     <Text style={styles.urgentTitle} numberOfLines={2}>
-                      {plan.experimentName || "Kế hoạch Phân bổ Tài nguyên"}
+                      {plan.experimentName || "Resource Allocation Plan"}
                     </Text>
                     <View style={styles.urgentMetaRow}>
                       <Text style={styles.urgentAuthor}>
-                        Độ tối ưu: {plan.fitnessScore ? `${plan.fitnessScore}%` : "GA Tối ưu"}
+                        Fitness Score: {plan.fitnessScore != null ? `${plan.fitnessScore}` : "GA Optimized"}
                       </Text>
                       <View style={[styles.urgentActionBtn, { backgroundColor: "#7e22ce" }]}>
                         <Ionicons name="eye-outline" size={14} color="#ffffff" />
-                        <Text style={styles.urgentActionText}>Duyệt phân bổ</Text>
+                        <Text style={styles.urgentActionText}>Review</Text>
                       </View>
                     </View>
                   </TouchableOpacity>
@@ -300,14 +300,14 @@ export default function DashboardScreen() {
 
           {/* Resource Utilization */}
           <View style={styles.sectionTitleRow}>
-            <Text style={styles.sectionTitle}>Tỷ lệ Khai thác Tài nguyên</Text>
+            <Text style={styles.sectionTitle}>Resource Utilization</Text>
           </View>
 
           <View style={styles.resourceSummaryCard}>
             {/* Equipment usage */}
             <View style={styles.resourceRow}>
               <View style={styles.resourceRowHeader}>
-                <Text style={styles.resourceLabel}>Trang thiết bị & Máy móc</Text>
+                <Text style={styles.resourceLabel}>Equipment & Machinery</Text>
                 <Text style={styles.resourceValue}>
                   {metrics?.totalEquipment
                     ? Math.round(
@@ -344,7 +344,7 @@ export default function DashboardScreen() {
             {/* Maintenance */}
             <View style={styles.resourceRow}>
               <View style={styles.resourceRowHeader}>
-                <Text style={styles.resourceLabel}>Thiết bị bảo trì / sửa chữa</Text>
+                <Text style={styles.resourceLabel}>Equipment Under Maintenance</Text>
                 <Text style={styles.resourceValue}>
                   {metrics?.totalEquipment
                     ? Math.round(

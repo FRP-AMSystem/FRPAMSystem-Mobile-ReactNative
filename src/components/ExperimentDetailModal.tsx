@@ -111,22 +111,22 @@ export function ExperimentDetailModal({
     if (!experiment) return;
 
     Alert.alert(
-      "Phê duyệt đề tài",
-      `Bạn có chắc chắn muốn phê duyệt đề tài "${experiment.experimentName}" không?`,
+      "Approve Experiment",
+      `Are you sure you want to approve experiment "${experiment.experimentName}"?`,
       [
-        { text: "Hủy", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         {
-          text: "Phê duyệt",
+          text: "Approve",
           onPress: async () => {
             try {
               setActionLoading(true);
               await approveExperiment(experiment.experimentId);
-              Alert.alert("Thành công", "Đề tài đã được phê duyệt chính thức!");
+              Alert.alert("Success", "Experiment has been officially approved!");
               onSuccess();
               onClose();
             } catch (err: any) {
               console.error(err);
-              Alert.alert("Lỗi", "Không thể phê duyệt đề tài.");
+              Alert.alert("Error", "Failed to approve experiment.");
             } finally {
               setActionLoading(false);
             }
@@ -142,12 +142,12 @@ export function ExperimentDetailModal({
       setActionLoading(true);
       await rejectExperiment(experiment.experimentId, reason);
       setRejectModalVisible(false);
-      Alert.alert("Thành công", "Đã từ chối đề tài và gửi phản hồi lý do.");
+      Alert.alert("Success", "Experiment rejected and feedback sent.");
       onSuccess();
       onClose();
     } catch (err: any) {
       console.error(err);
-      Alert.alert("Lỗi", "Không thể từ chối đề tài.");
+      Alert.alert("Error", "Failed to reject experiment.");
     } finally {
       setActionLoading(false);
     }
@@ -157,25 +157,25 @@ export function ExperimentDetailModal({
     if (!experiment) return;
 
     Alert.alert(
-      "Xác nhận nộp đề tài",
-      `Bạn có chắc chắn muốn nộp đề tài "${experiment.experimentName}" lên Quản lý phê duyệt không?`,
+      "Submit Experiment",
+      `Are you sure you want to submit "${experiment.experimentName}" for Manager approval?`,
       [
-        { text: "Hủy", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         {
-          text: "Nộp đề tài",
+          text: "Submit",
           onPress: async () => {
             try {
               setSubmitting(true);
               await submitExperiment(experiment.experimentId);
               Alert.alert(
-                "Thành công",
-                "Đề tài đã được nộp phê duyệt. Quản lý sẽ sớm thẩm định kế hoạch của bạn."
+                "Success",
+                "Experiment submitted for approval. The Manager will review your plan shortly."
               );
               onSuccess();
               onClose();
             } catch (err: any) {
               console.error(err);
-              Alert.alert("Lỗi", "Không thể nộp đề tài phê duyệt.");
+              Alert.alert("Error", "Failed to submit experiment for approval.");
             } finally {
               setSubmitting(false);
             }
@@ -188,19 +188,19 @@ export function ExperimentDetailModal({
   const getStatusBadge = (status?: ExperimentStatus) => {
     switch (status) {
       case "Running":
-        return { label: "Đang chạy", bg: "#f0fdf4", text: "#15803d", border: "#86efac" };
+        return { label: "Running", bg: "#f0fdf4", text: "#15803d", border: "#86efac" };
       case "Approved":
-        return { label: "Đã duyệt", bg: "#eff6ff", text: "#1d4ed8", border: "#bfdbfe" };
+        return { label: "Approved", bg: "#eff6ff", text: "#1d4ed8", border: "#bfdbfe" };
       case "Pending":
-        return { label: "Chờ duyệt", bg: "#fffbeb", text: "#b45309", border: "#fde68a" };
+        return { label: "Pending", bg: "#fffbeb", text: "#b45309", border: "#fde68a" };
       case "Completed":
-        return { label: "Hoàn tất", bg: "#faf5ff", text: "#7e22ce", border: "#e9d5ff" };
+        return { label: "Completed", bg: "#faf5ff", text: "#7e22ce", border: "#e9d5ff" };
       case "Rejected":
-        return { label: "Từ chối", bg: "#fef2f2", text: "#b91c1c", border: "#fca5a5" };
+        return { label: "Rejected", bg: "#fef2f2", text: "#b91c1c", border: "#fca5a5" };
       case "Draft":
       case "Created":
       default:
-        return { label: "Bản nháp", bg: "#f1f5f9", text: "#475569", border: "#cbd5e1" };
+        return { label: "Draft", bg: "#f1f5f9", text: "#475569", border: "#cbd5e1" };
     }
   };
 
@@ -219,10 +219,10 @@ export function ExperimentDetailModal({
             <View style={styles.headerTitleGroup}>
               <View style={styles.categoryPill}>
                 <Ionicons name="flask" size={12} color="#166534" />
-                <Text style={styles.categoryPillText}>ĐỀ TÀI KHẢO NGHIỆM</Text>
+                <Text style={styles.categoryPillText}>EXPERIMENT TRIAL</Text>
               </View>
               <Text style={styles.modalTitle} numberOfLines={1}>
-                Chi tiết Đề tài Nghiên cứu
+                Experiment Details
               </Text>
             </View>
 
@@ -234,10 +234,10 @@ export function ExperimentDetailModal({
           {/* Sub-Tabs */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabRow}>
             {[
-              { key: "overview", label: "Tổng quan & Phase" },
-              { key: "equipment", label: `Thiết bị (${equipmentReqs.length})` },
-              { key: "human", label: `Nhân sự (${humanReqs.length})` },
-              { key: "land", label: `Khu đất (${landReqs.length})` },
+              { key: "overview", label: "Overview & Phases" },
+              { key: "equipment", label: `Equipment (${equipmentReqs.length})` },
+              { key: "human", label: `Personnel (${humanReqs.length})` },
+              { key: "land", label: `Land (${landReqs.length})` },
             ].map((tab) => {
               const isActive = activeTab === tab.key;
               return (
@@ -259,12 +259,12 @@ export function ExperimentDetailModal({
         {loading ? (
           <View style={styles.centerLoading}>
             <ActivityIndicator size="large" color={Colors.primary} />
-            <Text style={styles.loadingText}>Đang tải chi tiết đề tài...</Text>
+            <Text style={styles.loadingText}>Loading experiment details...</Text>
           </View>
         ) : !experiment ? (
           <View style={styles.centerLoading}>
             <Ionicons name="alert-circle-outline" size={48} color={Colors.textMuted} />
-            <Text style={styles.emptyText}>Không tìm thấy thông tin đề tài này.</Text>
+            <Text style={styles.emptyText}>No information found for this experiment.</Text>
           </View>
         ) : (
           <ScrollView
@@ -285,14 +285,14 @@ export function ExperimentDetailModal({
                     {experiment.priority != null ? (
                       <View style={styles.priorityBadge}>
                         <Text style={styles.priorityText}>
-                          Ưu tiên:{" "}
+                          Priority:{" "}
                           {experiment.priority === "3"
-                            ? "Khẩn cấp"
+                            ? "Urgent"
                             : experiment.priority === "2"
-                            ? "Cao"
+                            ? "High"
                             : experiment.priority === "1"
-                            ? "Trung bình"
-                            : "Thấp"}
+                            ? "Medium"
+                            : "Low"}
                         </Text>
                       </View>
                     ) : null}
@@ -309,20 +309,20 @@ export function ExperimentDetailModal({
                     <View style={styles.infoRow}>
                       <Ionicons name="calendar-outline" size={15} color={Colors.primary} />
                       <Text style={styles.infoText}>
-                        Thời gian: {formatDate(experiment.expectStartDate)} -{" "}
+                        Timeline: {formatDate(experiment.expectStartDate)} -{" "}
                         {formatDate(experiment.expectEndDate)}
                       </Text>
                     </View>
 
                     <View style={styles.infoRow}>
                       <Ionicons name="alarm-outline" size={15} color="#d97706" />
-                      <Text style={styles.infoText}>Hạn chót: {formatDate(experiment.deadline)}</Text>
+                      <Text style={styles.infoText}>Deadline: {formatDate(experiment.deadline)}</Text>
                     </View>
 
                     {experiment.researcherName ? (
                       <View style={styles.infoRow}>
                         <Ionicons name="person-circle-outline" size={15} color="#9333ea" />
-                        <Text style={styles.infoText}>Chủ nhiệm: {experiment.researcherName}</Text>
+                        <Text style={styles.infoText}>Lead Researcher: {experiment.researcherName}</Text>
                       </View>
                     ) : null}
                   </View>
@@ -333,21 +333,21 @@ export function ExperimentDetailModal({
                   <View style={styles.sectionHeader}>
                     <View style={styles.sectionHeaderLeft}>
                       <Ionicons name="layers" size={18} color={Colors.primary} />
-                      <Text style={styles.sectionTitle}>Các Giai đoạn Khảo nghiệm</Text>
+                      <Text style={styles.sectionTitle}>Experiment Phases</Text>
                     </View>
                     <View style={styles.itemCountBadge}>
-                      <Text style={styles.itemCountText}>{phases.length} Phase</Text>
+                      <Text style={styles.itemCountText}>{phases.length} Phases</Text>
                     </View>
                   </View>
 
                   {phases.length === 0 ? (
-                    <Text style={styles.emptyText}>Chưa có giai đoạn nào được tạo.</Text>
+                    <Text style={styles.emptyText}>No phases created yet.</Text>
                   ) : (
                     phases.map((phase, idx) => (
                       <View key={phase.experimentPhaseId || idx} style={styles.phaseCard}>
                         <View style={styles.phaseCardTop}>
                           <View style={styles.phaseOrderPill}>
-                            <Text style={styles.phaseOrderText}>Giai đoạn #{idx + 1}</Text>
+                            <Text style={styles.phaseOrderText}>Phase #{idx + 1}</Text>
                           </View>
                           <Text style={styles.phaseDates}>
                             {formatDate(phase.expectedStartDate)} - {formatDate(phase.expectedEndDate)}
@@ -370,40 +370,40 @@ export function ExperimentDetailModal({
                 <View style={styles.sectionHeader}>
                   <View style={styles.sectionHeaderLeft}>
                     <Ionicons name="construct" size={18} color="#d97706" />
-                    <Text style={styles.sectionTitle}>Yêu cầu Thiết bị & Máy móc</Text>
+                    <Text style={styles.sectionTitle}>Equipment & Machinery Requirements</Text>
                   </View>
                   <View style={styles.itemCountBadge}>
-                    <Text style={styles.itemCountText}>{equipmentReqs.length} yêu cầu</Text>
+                    <Text style={styles.itemCountText}>{equipmentReqs.length} reqs</Text>
                   </View>
                 </View>
 
                 {equipmentReqs.length === 0 ? (
-                  <Text style={styles.emptyText}>Chưa có yêu cầu thiết bị nào.</Text>
+                  <Text style={styles.emptyText}>No equipment requirements added.</Text>
                 ) : (
                   equipmentReqs.map((eq, idx) => (
                     <View key={eq.expEquipmentReqId || idx} style={styles.resourceItemCard}>
                       <View style={styles.resourceItemHeader}>
                         <Text style={styles.resourceItemTitle}>
-                          {eq.equipmentTypeName || "Thiết bị chuyên dụng"}
+                          {eq.equipmentTypeName || "Specialized Equipment"}
                         </Text>
                         <View style={styles.resourceQtyBadge}>
-                          <Text style={styles.resourceQtyText}>{eq.quantity} chiếc</Text>
+                          <Text style={styles.resourceQtyText}>{eq.quantity} units</Text>
                         </View>
                       </View>
                       <Text style={styles.resourceItemSub}>
-                        Hiệu suất tối thiểu:{" "}
+                        Min Efficiency:{" "}
                         {eq.minAcceptableEfficiency != null
                           ? `${Math.round(
                               eq.minAcceptableEfficiency > 1
                                 ? eq.minAcceptableEfficiency
                                 : eq.minAcceptableEfficiency * 100
                             )}%`
-                          : "Không quy định"}{" "}
-                        • Thay thế: {eq.allowSubstitute ? "Cho phép" : "Không cho phép"}
+                          : "Unspecified"}{" "}
+                        • Substitute: {eq.allowSubstitute ? "Allowed" : "Not Allowed"}
                       </Text>
                       {eq.note ? (
                         <Text style={[styles.resourceItemSub, { fontStyle: "italic", marginTop: 4 }]}>
-                          Ghi chú: {eq.note}
+                          Note: {eq.note}
                         </Text>
                       ) : null}
                     </View>
@@ -418,35 +418,35 @@ export function ExperimentDetailModal({
                 <View style={styles.sectionHeader}>
                   <View style={styles.sectionHeaderLeft}>
                     <Ionicons name="people" size={18} color="#9333ea" />
-                    <Text style={styles.sectionTitle}>Yêu cầu Nhân sự & Kỹ năng</Text>
+                    <Text style={styles.sectionTitle}>Personnel & Skills Requirements</Text>
                   </View>
                   <View style={styles.itemCountBadge}>
-                    <Text style={styles.itemCountText}>{humanReqs.length} yêu cầu</Text>
+                    <Text style={styles.itemCountText}>{humanReqs.length} reqs</Text>
                   </View>
                 </View>
 
                 {humanReqs.length === 0 ? (
-                  <Text style={styles.emptyText}>Chưa có yêu cầu nhân sự nào.</Text>
+                  <Text style={styles.emptyText}>No personnel requirements added.</Text>
                 ) : (
                   humanReqs.map((hu, idx) => (
                     <View key={hu.expHumanReqId || idx} style={styles.resourceItemCard}>
                       <View style={styles.resourceItemHeader}>
                         <Text style={styles.resourceItemTitle}>
-                          {hu.roleName === "Technician" ? "Kỹ thuật viên" : "Nhân sự Thời vụ"}
+                          {hu.roleName === "Technician" ? "Technician" : "Seasonal Worker"}
                         </Text>
                         <View style={[styles.resourceQtyBadge, { backgroundColor: "#faf5ff" }]}>
                           <Text style={[styles.resourceQtyText, { color: "#7e22ce" }]}>
-                            {hu.quantity} nhân sự
+                            {hu.quantity} staff
                           </Text>
                         </View>
                       </View>
                       <Text style={styles.resourceItemSub}>
-                        Kỹ năng: {hu.requiredSkillName || "Bất kỳ"} • Khối lượng:{" "}
-                        {hu.workingHoursPerDay || 8}h/ngày
+                        Skill: {hu.requiredSkillName || "Any"} • Workload:{" "}
+                        {hu.workingHoursPerDay || 8}h/day
                       </Text>
                       {hu.note ? (
                         <Text style={[styles.resourceItemSub, { fontStyle: "italic", marginTop: 4 }]}>
-                          Nhiệm vụ: {hu.note}
+                          Task note: {hu.note}
                         </Text>
                       ) : null}
                     </View>
@@ -461,31 +461,31 @@ export function ExperimentDetailModal({
                 <View style={styles.sectionHeader}>
                   <View style={styles.sectionHeaderLeft}>
                     <Ionicons name="leaf" size={18} color="#16a34a" />
-                    <Text style={styles.sectionTitle}>Yêu cầu Đất Khảo nghiệm</Text>
+                    <Text style={styles.sectionTitle}>Land Plot Requirements</Text>
                   </View>
                   <View style={styles.itemCountBadge}>
-                    <Text style={styles.itemCountText}>{landReqs.length} khu đất</Text>
+                    <Text style={styles.itemCountText}>{landReqs.length} plots</Text>
                   </View>
                 </View>
 
                 {landReqs.length === 0 ? (
-                  <Text style={styles.emptyText}>Chưa có yêu cầu khu đất nào.</Text>
+                  <Text style={styles.emptyText}>No land plot requirements added.</Text>
                 ) : (
                   landReqs.map((land, idx) => (
                     <View key={land.expLandReqId || idx} style={styles.resourceItemCard}>
                       <View style={styles.resourceItemHeader}>
                         <Text style={styles.resourceItemTitle}>
-                          Diện tích: {land.requiredArea.toLocaleString()} m²
+                          Area: {land.requiredArea.toLocaleString()} m²
                         </Text>
                         <View style={[styles.resourceQtyBadge, { backgroundColor: "#f0fdf4" }]}>
                           <Text style={[styles.resourceQtyText, { color: "#15803d" }]}>
-                            {land.requiredSoilType || "Tùy chọn"}
+                            {land.requiredSoilType || "Any soil type"}
                           </Text>
                         </View>
                       </View>
                       {land.note ? (
                         <Text style={[styles.resourceItemSub, { fontStyle: "italic", marginTop: 4 }]}>
-                          Yêu cầu vị trí: {land.note}
+                          Location requirements: {land.note}
                         </Text>
                       ) : null}
                     </View>
@@ -514,7 +514,7 @@ export function ExperimentDetailModal({
                   activeOpacity={0.8}
                 >
                   <Ionicons name="checkmark-circle" size={18} color="#ffffff" />
-                  <Text style={styles.approveBtnText}>Phê duyệt Đề tài</Text>
+                  <Text style={styles.approveBtnText}>Approve Experiment</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -524,7 +524,7 @@ export function ExperimentDetailModal({
                   activeOpacity={0.8}
                 >
                   <Ionicons name="close-circle" size={18} color="#ffffff" />
-                  <Text style={styles.rejectBtnText}>Từ chối</Text>
+                  <Text style={styles.rejectBtnText}>Reject</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -542,7 +542,7 @@ export function ExperimentDetailModal({
                 ) : (
                   <>
                     <Ionicons name="paper-plane-outline" size={18} color="#ffffff" />
-                    <Text style={styles.submitActionBtnText}>Nộp Đề tài Phê duyệt</Text>
+                    <Text style={styles.submitActionBtnText}>Submit for Approval</Text>
                   </>
                 )}
               </TouchableOpacity>
@@ -555,7 +555,7 @@ export function ExperimentDetailModal({
               activeOpacity={0.8}
             >
               <Ionicons name="sparkles" size={18} color="#ffffff" />
-              <Text style={styles.aiActionBtnText}>Tối ưu hóa Phân bổ bằng AI (GA Solver)</Text>
+              <Text style={styles.aiActionBtnText}>AI Allocation Optimizer (GA Solver)</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -576,9 +576,9 @@ export function ExperimentDetailModal({
         {/* Reject Reason Modal */}
         <RejectReasonModal
           visible={rejectModalVisible}
-          title="Từ chối Đề tài Khảo nghiệm"
+          title="Reject Research Experiment"
           itemTitle={experiment?.experimentName || undefined}
-          itemType="đề tài"
+          itemType="experiment"
           loading={actionLoading}
           onClose={() => setRejectModalVisible(false)}
           onConfirm={handleRejectConfirm}

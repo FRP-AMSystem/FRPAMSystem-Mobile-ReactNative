@@ -7,6 +7,7 @@ import {
 export async function getExperiments(params?: {
   Keyword?: string;
   Status?: string;
+  ResearcherId?: number;
   Page?: number;
   Size?: number;
 }): Promise<ExperimentItem[]> {
@@ -60,8 +61,8 @@ export async function rejectExperiment(id: number, reason: string): Promise<any>
   } catch (err) {
     const exp = await getExperimentById(id);
     const updatedDesc = exp.description
-      ? `${exp.description}\n[Lý do từ chối: ${reason}]`
-      : `[Lý do từ chối: ${reason}]`;
+      ? `${exp.description}\n[Rejection Reason: ${reason}]`
+      : `[Rejection Reason: ${reason}]`;
     const res = await client.put(`/Experiments/${id}`, {
       experimentName: exp.experimentName,
       description: updatedDesc,

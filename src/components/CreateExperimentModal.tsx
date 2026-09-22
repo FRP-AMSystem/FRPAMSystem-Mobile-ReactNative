@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Modal,
   View,
@@ -14,6 +14,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../constants/colors";
+import { useAuth } from "../context/AuthContext";
 import { createExperiment, getExperiments } from "../api/experimentApi";
 import { createExperimentPhase } from "../api/experimentPhaseApi";
 import {
@@ -78,10 +79,10 @@ interface LandReqFormItem {
 }
 
 const PRIORITY_OPTIONS = [
-  { value: "0", label: "Thấp (Low)" },
-  { value: "1", label: "Trung bình (Med)" },
-  { value: "2", label: "Cao (High)" },
-  { value: "3", label: "Khẩn cấp (Urgent)" },
+  { value: "0", label: "Low" },
+  { value: "1", label: "Medium" },
+  { value: "2", label: "High" },
+  { value: "3", label: "Urgent" },
 ];
 
 export function CreateExperimentModal({
@@ -90,6 +91,8 @@ export function CreateExperimentModal({
   onSuccess,
 }: CreateExperimentModalProps) {
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
+  const scrollRef = useRef<ScrollView>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -147,10 +150,15 @@ export function CreateExperimentModal({
       setEquipmentTypes(eqs);
       setSkills(sks);
       setSoilTypes(soils);
-      const fieldRoles = rls.filter(
-        (r) => !["admin", "manager"].includes((r.roleName || "").toLowerCase())
-      );
-      setRoles(fieldRoles.length > 0 ? fieldRoles : rls);
+      const fieldRoles = rls.filter((r) => {
+        const name = (r.roleName || "").toLowerCase();
+        return name.includes("technician") || name.includes("seasonal");
+      });
+      const fallbackRoles: RoleItem[] = [
+        { roleId: 3, roleName: "Technician", name: "Technician", description: "" },
+        { roleId: 4, roleName: "Seasonal", name: "Seasonal Worker", description: "" },
+      ];
+      setRoles(fieldRoles.length > 0 ? fieldRoles : fallbackRoles);
     } catch (err) {
       console.error("Load reference data error:", err);
     }
@@ -218,7 +226,7 @@ export function CreateExperimentModal({
     const nextOrder = phases.length + 1;
     const newPhase: PhaseFormItem = {
       id: `phase-${Date.now()}-${Math.random()}`,
-      phaseName: `Giai đoạn ${nextOrder}`,
+      phaseName: `Phase ${nextOrder}`,
       phaseDescription: "",
       phaseOrder: nextOrder,
       expectedStartDate: expectStartDate || new Date().toISOString().slice(0, 10),
@@ -246,9 +254,9 @@ export function CreateExperimentModal({
     const newReq: EquipmentReqFormItem = {
       id: `eq-req-${Date.now()}-${Math.random()}`,
       phaseId: curPhase?.id || "",
-      phaseName: curPhase?.phaseName || "Giai đoạn 1",
+      phaseName: curPhase?.phaseName || "Phase 1",
       equipmentTypeId: firstType ? firstType.equipmentTypeId : 1,
-      equipmentTypeName: firstType ? firstType.name : "Thiết bị",
+      equipmentTypeName: firstType ? firstType.name : "Equipment",
       quantity: 1,
       minAcceptableEfficiency: 80,
       allowSubstitute: true,
@@ -264,13 +272,15 @@ export function CreateExperimentModal({
   // Step 4: Human Reqs handlers
   const handleAddHumanReq = () => {
     const curPhase = phases.find((p) => p.id === activePhaseId) || phases[0];
-    const firstRole = roles[0] || { roleId: 3, roleName: "Technician" };
+    const defaultRole =
+      roles.find((r) => r.roleName.toLowerCase().includes("technician")) ||
+      roles[0] || { roleId: 3, roleName: "Technician" };
     const newReq: HumanReqFormItem = {
       id: `hu-req-${Date.now()}-${Math.random()}`,
       phaseId: curPhase?.id || "",
-      phaseName: curPhase?.phaseName || "Giai đoạn 1",
-      roleId: firstRole.roleId,
-      roleName: firstRole.roleName,
+      phaseName: curPhase?.phaseName || "Phase 1",
+      roleId: defaultRole.roleId,
+      roleName: defaultRole.roleName,
       quantity: 1,
       requiredSkillId: null,
       workingHoursPerDay: 8,
@@ -286,13 +296,13 @@ export function CreateExperimentModal({
   // Step 5: Land Reqs handlers
   const handleAddLandReq = () => {
     if (landReqs.length >= 1) {
-      Alert.alert("Thông báo", "Mỗi đề tài thử nghiệm chỉ yêu cầu tối đa 1 khu đất khảo nghiệm.");
+      Alert.alert("Notice", "Each experiment requires at most 1 land plot.");
       return;
     }
     const newReq: LandReqFormItem = {
       id: `land-req-${Date.now()}`,
       requiredArea: 500,
-      requiredSoilType: soilTypes[0] || "Đất đỏ Bazan",
+      requiredSoilType: soilTypes[0] || "Red Basalt Soil",
       note: "",
     };
     setLandReqs([newReq]);
@@ -302,46 +312,133 @@ export function CreateExperimentModal({
     setLandReqs([]);
   };
 
+  // Validation logic per step
+  const validateStepData = (step: number): string | null => {
+    if (step === 1) {
+      if (!experimentName.trim()) {
+        return "[Step 1 - Info] Please enter experiment name.";
+      }
+      if (experimentName.trim().length < 3) {
+        return "[Step 1 - Info] Experiment name must be at least 3 characters long.";
+      }
+      if (!expectStartDate) {
+        return "[Step 1 - Info] Please select expected start date.";
+      }
+      if (!expectEndDate) {
+        return "[Step 1 - Info] Please select expected end date.";
+      }
+      if (expectStartDate > expectEndDate) {
+        return "[Step 1 - Info] Expected end date must be on or after expected start date.";
+      }
+      if (deadline && deadline < expectEndDate) {
+        return "[Step 1 - Info] Report deadline must be on or after expected end date.";
+      }
+    } else if (step === 2) {
+      if (phases.length === 0) {
+        return "[Step 2 - Phases] Please add at least 1 experiment phase.";
+      }
+      for (let i = 0; i < phases.length; i++) {
+        const p = phases[i];
+        if (!p.phaseName.trim()) {
+          return `[Step 2 - Phases] Phase #${i + 1}: Phase name cannot be empty.`;
+        }
+        if (!p.expectedStartDate) {
+          return `[Step 2 - Phases] Phase #${i + 1} (${p.phaseName}): Start date is required.`;
+        }
+        if (!p.expectedEndDate) {
+          return `[Step 2 - Phases] Phase #${i + 1} (${p.phaseName}): End date is required.`;
+        }
+        if (p.expectedStartDate > p.expectedEndDate) {
+          return `[Step 2 - Phases] Phase #${i + 1} (${p.phaseName}): End date must be on or after start date.`;
+        }
+      }
+    } else if (step === 3) {
+      for (let i = 0; i < equipmentReqs.length; i++) {
+        const eq = equipmentReqs[i];
+        if (!eq.quantity || eq.quantity < 1) {
+          return `[Step 3 - Equipment] Equipment requirement #${i + 1}: Quantity must be at least 1 unit.`;
+        }
+        if (eq.minAcceptableEfficiency < 0 || eq.minAcceptableEfficiency > 100) {
+          return `[Step 3 - Equipment] Equipment requirement #${i + 1}: Minimum efficiency must be between 0% and 100%.`;
+        }
+      }
+    } else if (step === 4) {
+      for (let i = 0; i < humanReqs.length; i++) {
+        const hu = humanReqs[i];
+        if (!hu.quantity || hu.quantity < 1) {
+          return `[Step 4 - Personnel] Personnel requirement #${i + 1}: Headcount must be at least 1.`;
+        }
+        if (!hu.workingHoursPerDay || hu.workingHoursPerDay < 1 || hu.workingHoursPerDay > 24) {
+          return `[Step 4 - Personnel] Personnel requirement #${i + 1}: Working hours per day must be between 1 and 24.`;
+        }
+      }
+    } else if (step === 5) {
+      for (let i = 0; i < landReqs.length; i++) {
+        const land = landReqs[i];
+        if (!land.requiredArea || land.requiredArea <= 0) {
+          return `[Step 5 - Land] Land requirement: Required Area must be greater than 0 m².`;
+        }
+        if (!land.requiredSoilType) {
+          return `[Step 5 - Land] Land requirement: Please select a soil type.`;
+        }
+      }
+    }
+    return null;
+  };
+
+  const validateAllSteps = (): { step: number; message: string } | null => {
+    for (let s = 1; s <= 5; s++) {
+      const err = validateStepData(s);
+      if (err) {
+        return { step: s, message: err };
+      }
+    }
+    return null;
+  };
+
   // Stepper logic
+  const handleJumpToStep = (targetStep: number) => {
+    setError("");
+    if (targetStep > currentStep) {
+      for (let s = 1; s < targetStep; s++) {
+        const stepErr = validateStepData(s);
+        if (stepErr) {
+          setError(stepErr);
+          setCurrentStep(s);
+          scrollRef.current?.scrollTo({ y: 0, animated: true });
+          return;
+        }
+      }
+    }
+    setCurrentStep(targetStep);
+  };
+
   const handleNextStep = () => {
     setError("");
 
-    if (currentStep === 1) {
-      if (!experimentName.trim()) {
-        setError("Vui lòng nhập tên đề tài thử nghiệm.");
-        return;
-      }
-      if (expectStartDate && expectEndDate && expectStartDate > expectEndDate) {
-        setError("Ngày kết thúc dự kiến phải sau ngày bắt đầu.");
-        return;
-      }
-      if (deadline && expectEndDate && deadline < expectEndDate) {
-        setError("Hạn nộp báo cáo phải sau hoặc bằng ngày kết thúc.");
-        return;
-      }
-      if (phases.length === 0) {
-        // Auto create 1 default phase if none exists
-        const defaultPhase: PhaseFormItem = {
-          id: `phase-${Date.now()}`,
-          phaseName: "Giai đoạn 1: Chuẩn bị & Triển khai",
-          phaseDescription: "Công tác chuẩn bị hiện trường và bố trí thí nghiệm",
-          phaseOrder: 1,
-          expectedStartDate: expectStartDate || new Date().toISOString().slice(0, 10),
-          expectedEndDate: expectEndDate || new Date().toISOString().slice(0, 10),
-        };
-        setPhases([defaultPhase]);
-        setActivePhaseId(defaultPhase.id);
-      }
+    const err = validateStepData(currentStep);
+    if (err) {
+      setError(err);
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
+      return;
     }
 
-    if (currentStep === 2) {
-      if (phases.length === 0) {
-        setError("Vui lòng thêm ít nhất 1 giai đoạn khảo nghiệm.");
-        return;
-      }
-      if (!activePhaseId) {
-        setActivePhaseId(phases[0].id);
-      }
+    if (currentStep === 1 && phases.length === 0) {
+      // Auto create 1 default phase if none exists
+      const defaultPhase: PhaseFormItem = {
+        id: `phase-${Date.now()}`,
+        phaseName: "Phase 1: Preparation & Setup",
+        phaseDescription: "Field preparation and trial layout",
+        phaseOrder: 1,
+        expectedStartDate: expectStartDate || new Date().toISOString().slice(0, 10),
+        expectedEndDate: expectEndDate || new Date().toISOString().slice(0, 10),
+      };
+      setPhases([defaultPhase]);
+      setActivePhaseId(defaultPhase.id);
+    }
+
+    if (currentStep === 2 && phases.length > 0 && !activePhaseId) {
+      setActivePhaseId(phases[0].id);
     }
 
     if (currentStep < 5) {
@@ -359,13 +456,17 @@ export function CreateExperimentModal({
   // Submit Plan Flow
   const handleSavePlan = async () => {
     setError("");
-    const trimmedName = experimentName.trim();
-    if (!trimmedName) {
-      setError("Vui lòng nhập tên đề tài.");
-      setCurrentStep(1);
+
+    // Validate all 5 steps first and jump to the failing step immediately
+    const valRes = validateAllSteps();
+    if (valRes) {
+      setError(valRes.message);
+      setCurrentStep(valRes.step);
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
       return;
     }
 
+    const trimmedName = experimentName.trim();
     setSaving(true);
     try {
       // 1. Check duplicate name
@@ -375,9 +476,10 @@ export function CreateExperimentModal({
           (item) => item.experimentName?.toLowerCase() === trimmedName.toLowerCase()
         );
         if (isDuplicate) {
-          setError(`Tên đề tài "${trimmedName}" đã tồn tại. Vui lòng đặt tên khác.`);
+          setError(`[Step 1 - Info] Experiment name "${trimmedName}" already exists. Please choose a different name.`);
           setSaving(false);
           setCurrentStep(1);
+          scrollRef.current?.scrollTo({ y: 0, animated: true });
           return;
         }
       } catch (checkErr) {
@@ -390,13 +492,15 @@ export function CreateExperimentModal({
         return `${d.slice(0, 10)}T00:00:00`;
       };
 
-      const expPayload = {
+      const expPayload: any = {
         experimentName: trimmedName,
         description: description.trim() || null,
+        researcherId: user?.userId || 1,
         expectStartDate: sanitizeIsoDate(expectStartDate),
         expectEndDate: sanitizeIsoDate(expectEndDate),
         deadline: sanitizeIsoDate(deadline || expectEndDate),
         priority: Number(priority) || 1,
+        status: "Draft",
       };
 
       const createdExp = await createExperiment(expPayload);
@@ -467,19 +571,63 @@ export function CreateExperimentModal({
       }
 
       Alert.alert(
-        "Tạo đề tài thành công",
-        `Đề tài "${trimmedName}" đã được lưu dưới dạng Bản nháp (Draft) kèm đầy đủ các giai đoạn và yêu cầu tài nguyên.`
+        "Experiment Created",
+        `Experiment "${trimmedName}" has been saved as Draft with all phases and resource requirements.`
       );
       onSuccess();
       onClose();
     } catch (err: any) {
       console.error("Create experiment wizard failed:", err);
-      const msg =
-        err?.response?.data?.message ||
-        err?.response?.data?.title ||
-        err?.message ||
-        "Không thể lưu đề tài thử nghiệm. Vui lòng kiểm tra lại thông tin.";
-      setError(msg);
+      let detailedMsg = "";
+
+      if (err?.response?.data?.errors && typeof err.response.data.errors === "object") {
+        const messages: string[] = [];
+        Object.entries(err.response.data.errors).forEach(([field, msgs]) => {
+          if (Array.isArray(msgs)) {
+            messages.push(`${field}: ${msgs.join(", ")}`);
+          } else if (msgs) {
+            messages.push(`${field}: ${String(msgs)}`);
+          }
+        });
+        if (messages.length > 0) detailedMsg = messages.join("\n");
+      }
+
+      if (!detailedMsg) {
+        detailedMsg =
+          err?.response?.data?.message ||
+          err?.response?.data?.detail ||
+          err?.response?.data?.title ||
+          (typeof err?.response?.data === "string" ? err.response.data : "") ||
+          (err?.response?.status === 500
+            ? "Server error (500): Could not process experiment. Please verify all information and try again."
+            : err?.message || "Failed to save experiment. Please verify all information.");
+      }
+
+      setError(detailedMsg);
+
+      // Auto-jump to the step where error likely occurred
+      const lower = detailedMsg.toLowerCase();
+      if (lower.includes("phase")) {
+        setCurrentStep(2);
+      } else if (lower.includes("equipment")) {
+        setCurrentStep(3);
+      } else if (
+        lower.includes("human") ||
+        lower.includes("personnel") ||
+        lower.includes("role") ||
+        lower.includes("skill")
+      ) {
+        setCurrentStep(4);
+      } else if (
+        lower.includes("land") ||
+        lower.includes("soil") ||
+        lower.includes("area")
+      ) {
+        setCurrentStep(5);
+      } else {
+        setCurrentStep(1);
+      }
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
     } finally {
       setSaving(false);
     }
@@ -504,8 +652,8 @@ export function CreateExperimentModal({
           <View style={styles.headerBar}>
             <View style={styles.headerTopRow}>
               <View style={styles.headerTitleGroup}>
-                <Text style={styles.headerTag}>LẬP KẾ HOẠCH KHẢO NGHIỆM</Text>
-                <Text style={styles.headerTitle}>Tạo Đề tài Mới</Text>
+                <Text style={styles.headerTag}>EXPERIMENT PLANNING</Text>
+                <Text style={styles.headerTitle}>Create New Experiment</Text>
               </View>
 
               <TouchableOpacity style={styles.closeBtn} onPress={onClose} activeOpacity={0.7}>
@@ -516,11 +664,11 @@ export function CreateExperimentModal({
             {/* Stepper Indicator */}
             <View style={styles.stepperContainer}>
               {[
-                { step: 1, label: "Thông tin" },
-                { step: 2, label: "Giai đoạn" },
-                { step: 3, label: "Thiết bị" },
-                { step: 4, label: "Nhân sự" },
-                { step: 5, label: "Khu đất" },
+                { step: 1, label: "Info" },
+                { step: 2, label: "Phases" },
+                { step: 3, label: "Equipment" },
+                { step: 4, label: "Personnel" },
+                { step: 5, label: "Land" },
               ].map((s, idx) => {
                 const isActive = currentStep === s.step;
                 const isCompleted = currentStep > s.step;
@@ -529,7 +677,7 @@ export function CreateExperimentModal({
                   <React.Fragment key={s.step}>
                     <TouchableOpacity
                       style={styles.stepItem}
-                      onPress={() => setCurrentStep(s.step)}
+                      onPress={() => handleJumpToStep(s.step)}
                       activeOpacity={0.8}
                     >
                       <View
@@ -581,6 +729,7 @@ export function CreateExperimentModal({
 
           {/* Step Content */}
           <ScrollView
+            ref={scrollRef}
             style={styles.scrollBody}
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
@@ -591,32 +740,32 @@ export function CreateExperimentModal({
                 <View style={styles.cardHeader}>
                   <View style={styles.cardTitleRow}>
                     <Ionicons name="information-circle" size={20} color={Colors.primary} />
-                    <View>
-                      <Text style={styles.cardTitle}>Bước 1: Thông tin Đề tài</Text>
+                    <View style={styles.cardTitleContainer}>
+                      <Text style={styles.cardTitle}>Step 1: General Info</Text>
                       <Text style={styles.cardSubtitle}>
-                        Mục tiêu nghiên cứu và giới hạn thời gian thực hiện
+                        Research objectives and trial timeline
                       </Text>
                     </View>
                   </View>
                 </View>
 
-                {/* Tên đề tài */}
+                {/* Experiment Name */}
                 <View style={styles.fieldGroup}>
                   <Text style={styles.fieldLabel}>
-                    Tên đề tài nghiên cứu <Text style={styles.requiredStar}>*</Text>
+                    Research Experiment Name <Text style={styles.requiredStar}>*</Text>
                   </Text>
                   <TextInput
                     style={styles.input}
-                    placeholder="VD: Đánh giá chất lượng đất rừng thông trồng năm 2026..."
+                    placeholder="e.g. Pine forest soil quality assessment 2026..."
                     placeholderTextColor="#94a3b8"
                     value={experimentName}
                     onChangeText={setExperimentName}
                   />
                 </View>
 
-                {/* Mức ưu tiên */}
+                {/* Priority */}
                 <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>Mức độ ưu tiên</Text>
+                  <Text style={styles.fieldLabel}>Priority Level</Text>
                   <View style={styles.prioritySelector}>
                     {PRIORITY_OPTIONS.map((opt) => (
                       <TouchableOpacity
@@ -640,15 +789,15 @@ export function CreateExperimentModal({
                   </View>
                 </View>
 
-                {/* Ngày bắt đầu */}
+                {/* Start Date */}
                 <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>Ngày bắt đầu dự kiến</Text>
+                  <Text style={styles.fieldLabel}>Expected Start Date</Text>
                   <TouchableOpacity
                     style={styles.datePickerBtn}
                     onPress={() =>
                       openDatePicker(
                         "expectStartDate",
-                        "Chọn ngày bắt đầu",
+                        "Select Start Date",
                         expectStartDate,
                         new Date().toISOString().slice(0, 10),
                         expectEndDate || deadline || undefined
@@ -660,21 +809,21 @@ export function CreateExperimentModal({
                         expectStartDate ? styles.datePickerValue : styles.datePickerPlaceholder
                       }
                     >
-                      {expectStartDate || "Chọn ngày bắt đầu"}
+                      {expectStartDate || "Select start date"}
                     </Text>
                     <Ionicons name="calendar-outline" size={18} color={Colors.primary} />
                   </TouchableOpacity>
                 </View>
 
-                {/* Ngày kết thúc */}
+                {/* End Date */}
                 <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>Ngày kết thúc dự kiến</Text>
+                  <Text style={styles.fieldLabel}>Expected End Date</Text>
                   <TouchableOpacity
                     style={styles.datePickerBtn}
                     onPress={() =>
                       openDatePicker(
                         "expectEndDate",
-                        "Chọn ngày kết thúc",
+                        "Select End Date",
                         expectEndDate,
                         expectStartDate || new Date().toISOString().slice(0, 10),
                         deadline || undefined
@@ -686,21 +835,21 @@ export function CreateExperimentModal({
                         expectEndDate ? styles.datePickerValue : styles.datePickerPlaceholder
                       }
                     >
-                      {expectEndDate || "Chọn ngày kết thúc"}
+                      {expectEndDate || "Select end date"}
                     </Text>
                     <Ionicons name="calendar-outline" size={18} color={Colors.primary} />
                   </TouchableOpacity>
                 </View>
 
-                {/* Hạn nộp */}
+                {/* Deadline */}
                 <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>Hạn chót nộp báo cáo (Deadline)</Text>
+                  <Text style={styles.fieldLabel}>Report Deadline</Text>
                   <TouchableOpacity
                     style={styles.datePickerBtn}
                     onPress={() =>
                       openDatePicker(
                         "deadline",
-                        "Chọn hạn chót nộp báo cáo",
+                        "Select Report Deadline",
                         deadline,
                         expectEndDate || expectStartDate || new Date().toISOString().slice(0, 10)
                       )
@@ -709,18 +858,18 @@ export function CreateExperimentModal({
                     <Text
                       style={deadline ? styles.datePickerValue : styles.datePickerPlaceholder}
                     >
-                      {deadline || "Chọn hạn nộp"}
+                      {deadline || "Select deadline"}
                     </Text>
                     <Ionicons name="calendar-outline" size={18} color={Colors.primary} />
                   </TouchableOpacity>
                 </View>
 
-                {/* Mô tả */}
+                {/* Description */}
                 <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>Mô tả & Mục tiêu nghiên cứu</Text>
+                  <Text style={styles.fieldLabel}>Description & Objectives</Text>
                   <TextInput
                     style={[styles.input, styles.textarea]}
-                    placeholder="Mô tả phương pháp khảo nghiệm, mục tiêu dự kiến đạt được..."
+                    placeholder="Describe research methodology, objectives, and expected outcomes..."
                     placeholderTextColor="#94a3b8"
                     value={description}
                     onChangeText={setDescription}
@@ -737,26 +886,26 @@ export function CreateExperimentModal({
                 <View style={styles.cardHeader}>
                   <View style={styles.cardTitleRow}>
                     <Ionicons name="layers" size={20} color={Colors.primary} />
-                    <View>
-                      <Text style={styles.cardTitle}>Bước 2: Giai đoạn Khảo nghiệm</Text>
+                    <View style={styles.cardTitleContainer}>
+                      <Text style={styles.cardTitle}>Step 2: Experiment Phases</Text>
                       <Text style={styles.cardSubtitle}>
-                        Phân chia tiến trình thành các giai đoạn tuần tự
+                        Divide progress into sequential phases
                       </Text>
                     </View>
                   </View>
 
                   <TouchableOpacity style={styles.addBtn} onPress={handleAddPhase} activeOpacity={0.8}>
                     <Ionicons name="add" size={16} color={Colors.primary} />
-                    <Text style={styles.addBtnText}>Thêm Phase</Text>
+                    <Text style={styles.addBtnText}>Add Phase</Text>
                   </TouchableOpacity>
                 </View>
 
                 {phases.length === 0 ? (
                   <View style={styles.emptyBox}>
                     <Ionicons name="layers-outline" size={36} color="#94a3b8" />
-                    <Text style={styles.emptyBoxText}>Chưa có giai đoạn nào</Text>
+                    <Text style={styles.emptyBoxText}>No phases added yet</Text>
                     <TouchableOpacity style={styles.addBtn} onPress={handleAddPhase}>
-                      <Text style={styles.addBtnText}>+ Thêm giai đoạn đầu tiên</Text>
+                      <Text style={styles.addBtnText}>+ Add First Phase</Text>
                     </TouchableOpacity>
                   </View>
                 ) : (
@@ -776,7 +925,7 @@ export function CreateExperimentModal({
 
                       {/* Phase Name */}
                       <View style={styles.fieldGroup}>
-                        <Text style={styles.fieldLabel}>Tên giai đoạn</Text>
+                        <Text style={styles.fieldLabel}>Phase Name</Text>
                         <TextInput
                           style={styles.input}
                           value={phase.phaseName}
@@ -785,20 +934,20 @@ export function CreateExperimentModal({
                               prev.map((p) => (p.id === phase.id ? { ...p, phaseName: val } : p))
                             )
                           }
-                          placeholder="VD: Chuẩn bị hiện trường & Lấy mẫu đất"
+                          placeholder="e.g. Field preparation & soil sampling"
                         />
                       </View>
 
                       {/* Dates */}
                       <View style={{ flexDirection: "row", gap: 10 }}>
                         <View style={[styles.fieldGroup, { flex: 1 }]}>
-                          <Text style={styles.fieldLabel}>Bắt đầu</Text>
+                          <Text style={styles.fieldLabel}>Start</Text>
                           <TouchableOpacity
                             style={styles.datePickerBtn}
                             onPress={() =>
                               openDatePicker(
                                 `phase-start-${phase.id}`,
-                                "Ngày bắt đầu giai đoạn",
+                                "Phase Start Date",
                                 phase.expectedStartDate,
                                 expectStartDate || undefined,
                                 phase.expectedEndDate || expectEndDate || undefined
@@ -806,19 +955,19 @@ export function CreateExperimentModal({
                             }
                           >
                             <Text style={styles.datePickerValue}>
-                              {phase.expectedStartDate || "Chọn ngày"}
+                              {phase.expectedStartDate || "Select date"}
                             </Text>
                           </TouchableOpacity>
                         </View>
 
                         <View style={[styles.fieldGroup, { flex: 1 }]}>
-                          <Text style={styles.fieldLabel}>Kết thúc</Text>
+                          <Text style={styles.fieldLabel}>End</Text>
                           <TouchableOpacity
                             style={styles.datePickerBtn}
                             onPress={() =>
                               openDatePicker(
                                 `phase-end-${phase.id}`,
-                                "Ngày kết thúc giai đoạn",
+                                "Phase End Date",
                                 phase.expectedEndDate,
                                 phase.expectedStartDate || expectStartDate || undefined,
                                 expectEndDate || undefined
@@ -826,7 +975,7 @@ export function CreateExperimentModal({
                             }
                           >
                             <Text style={styles.datePickerValue}>
-                              {phase.expectedEndDate || "Chọn ngày"}
+                              {phase.expectedEndDate || "Select date"}
                             </Text>
                           </TouchableOpacity>
                         </View>
@@ -834,7 +983,7 @@ export function CreateExperimentModal({
 
                       {/* Description */}
                       <View style={styles.fieldGroup}>
-                        <Text style={styles.fieldLabel}>Nội dung công việc</Text>
+                        <Text style={styles.fieldLabel}>Phase Description</Text>
                         <TextInput
                           style={styles.input}
                           value={phase.phaseDescription}
@@ -845,7 +994,7 @@ export function CreateExperimentModal({
                               )
                             )
                           }
-                          placeholder="Công việc trọng tâm trong giai đoạn này..."
+                          placeholder="Key activities in this phase..."
                         />
                       </View>
                     </View>
@@ -860,10 +1009,10 @@ export function CreateExperimentModal({
                 <View style={styles.cardHeader}>
                   <View style={styles.cardTitleRow}>
                     <Ionicons name="construct" size={20} color="#d97706" />
-                    <View>
-                      <Text style={styles.cardTitle}>Bước 3: Yêu cầu Thiết bị</Text>
+                    <View style={styles.cardTitleContainer}>
+                      <Text style={styles.cardTitle}>Step 3: Equipment Requirements</Text>
                       <Text style={styles.cardSubtitle}>
-                        Khai báo máy móc, phương tiện cần dùng cho từng giai đoạn
+                        Specify machinery and tools needed for each phase
                       </Text>
                     </View>
                   </View>
@@ -874,7 +1023,7 @@ export function CreateExperimentModal({
                     activeOpacity={0.8}
                   >
                     <Ionicons name="add" size={16} color={Colors.primary} />
-                    <Text style={styles.addBtnText}>Thêm Thiết bị</Text>
+                    <Text style={styles.addBtnText}>Add Equipment</Text>
                   </TouchableOpacity>
                 </View>
 
@@ -931,10 +1080,10 @@ export function CreateExperimentModal({
                   <View style={styles.emptyBox}>
                     <Ionicons name="construct-outline" size={36} color="#94a3b8" />
                     <Text style={styles.emptyBoxText}>
-                      Chưa có yêu cầu thiết bị nào cho {curActivePhase?.phaseName || "giai đoạn này"}
+                      No equipment requirements for {curActivePhase?.phaseName || "this phase"}
                     </Text>
                     <TouchableOpacity style={styles.addBtn} onPress={handleAddEquipmentReq}>
-                      <Text style={styles.addBtnText}>+ Thêm thiết bị cần dùng</Text>
+                      <Text style={styles.addBtnText}>+ Add Required Equipment</Text>
                     </TouchableOpacity>
                   </View>
                 ) : (
@@ -949,7 +1098,7 @@ export function CreateExperimentModal({
                         <View style={styles.itemRowTop}>
                           <View style={styles.itemBadge}>
                             <Text style={styles.itemBadgeText}>
-                              [{curActivePhase?.phaseName || "Phase"}] Thiết bị #{idx + 1}
+                              [{curActivePhase?.phaseName || "Phase"}] Equipment #{idx + 1}
                             </Text>
                           </View>
                           <TouchableOpacity
@@ -960,10 +1109,10 @@ export function CreateExperimentModal({
                           </TouchableOpacity>
                         </View>
 
-                        {/* Loại thiết bị Selector */}
+                        {/* Equipment Type Selector */}
                         <View style={styles.fieldGroup}>
                           <Text style={styles.fieldLabel}>
-                            Loại máy móc / Thiết bị <Text style={styles.requiredStar}>*</Text>
+                            Equipment Type <Text style={styles.requiredStar}>*</Text>
                           </Text>
                           <ScrollView
                             horizontal
@@ -1004,10 +1153,10 @@ export function CreateExperimentModal({
                           </ScrollView>
                         </View>
 
-                        {/* Số lượng & Hiệu suất */}
+                        {/* Quantity & Min Efficiency */}
                         <View style={{ flexDirection: "row", gap: 10 }}>
                           <View style={[styles.fieldGroup, { flex: 1 }]}>
-                            <Text style={styles.fieldLabel}>Số lượng (chiếc)</Text>
+                            <Text style={styles.fieldLabel}>Quantity (units)</Text>
                             <TextInput
                               style={styles.input}
                               keyboardType="numeric"
@@ -1025,7 +1174,7 @@ export function CreateExperimentModal({
                           </View>
 
                           <View style={[styles.fieldGroup, { flex: 1 }]}>
-                            <Text style={styles.fieldLabel}>Hiệu suất tối thiểu (%)</Text>
+                            <Text style={styles.fieldLabel}>Minimum Efficiency (%)</Text>
                             <TextInput
                               style={styles.input}
                               keyboardType="numeric"
@@ -1073,13 +1222,13 @@ export function CreateExperimentModal({
                             ) : null}
                           </View>
                           <Text style={styles.checkboxLabel}>
-                            Cho phép dùng thiết bị thay thế nếu hết máy
+                            Allow substitute equipment if primary unavailable
                           </Text>
                         </TouchableOpacity>
 
                         {/* Note */}
                         <View style={[styles.fieldGroup, { marginTop: 8 }]}>
-                          <Text style={styles.fieldLabel}>Ghi chú kỹ thuật</Text>
+                          <Text style={styles.fieldLabel}>Technical Notes</Text>
                           <TextInput
                             style={styles.input}
                             value={req.note}
@@ -1088,7 +1237,7 @@ export function CreateExperimentModal({
                                 prev.map((r) => (r.id === req.id ? { ...r, note: val } : r))
                               )
                             }
-                            placeholder="VD: Cần kèm theo bộ cảm biến GPS..."
+                            placeholder="e.g. Requires GPS sensor attachment..."
                           />
                         </View>
                       </View>
@@ -1103,10 +1252,10 @@ export function CreateExperimentModal({
                 <View style={styles.cardHeader}>
                   <View style={styles.cardTitleRow}>
                     <Ionicons name="people" size={20} color="#9333ea" />
-                    <View>
-                      <Text style={styles.cardTitle}>Bước 4: Yêu cầu Nhân sự</Text>
+                    <View style={styles.cardTitleContainer}>
+                      <Text style={styles.cardTitle}>Step 4: Personnel Requirements</Text>
                       <Text style={styles.cardSubtitle}>
-                        Bố trí vai trò (Kỹ thuật viên / Thời vụ) và kỹ năng yêu cầu
+                        Assign roles (Technician / Seasonal) and required skills
                       </Text>
                     </View>
                   </View>
@@ -1117,7 +1266,7 @@ export function CreateExperimentModal({
                     activeOpacity={0.8}
                   >
                     <Ionicons name="add" size={16} color={Colors.primary} />
-                    <Text style={styles.addBtnText}>Thêm Nhân sự</Text>
+                    <Text style={styles.addBtnText}>Add Personnel</Text>
                   </TouchableOpacity>
                 </View>
 
@@ -1174,10 +1323,10 @@ export function CreateExperimentModal({
                   <View style={styles.emptyBox}>
                     <Ionicons name="people-outline" size={36} color="#94a3b8" />
                     <Text style={styles.emptyBoxText}>
-                      Chưa có yêu cầu nhân sự nào cho {curActivePhase?.phaseName || "giai đoạn này"}
+                      No personnel requirements for {curActivePhase?.phaseName || "this phase"}
                     </Text>
                     <TouchableOpacity style={styles.addBtn} onPress={handleAddHumanReq}>
-                      <Text style={styles.addBtnText}>+ Thêm nhân sự cần bố trí</Text>
+                      <Text style={styles.addBtnText}>+ Add Personnel Requirement</Text>
                     </TouchableOpacity>
                   </View>
                 ) : (
@@ -1192,7 +1341,7 @@ export function CreateExperimentModal({
                         <View style={styles.itemRowTop}>
                           <View style={styles.itemBadge}>
                             <Text style={styles.itemBadgeText}>
-                              [{curActivePhase?.phaseName || "Phase"}] Nhân sự #{idx + 1}
+                              [{curActivePhase?.phaseName || "Phase"}] Personnel #{idx + 1}
                             </Text>
                           </View>
                           <TouchableOpacity
@@ -1205,49 +1354,52 @@ export function CreateExperimentModal({
 
                         {/* Role selection */}
                         <View style={styles.fieldGroup}>
-                          <Text style={styles.fieldLabel}>Vai trò (Role)</Text>
+                          <Text style={styles.fieldLabel}>Assigned Role</Text>
                           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-                            {roles.map((r) => {
-                              const isSel = req.roleId === r.roleId;
-                              return (
-                                <TouchableOpacity
-                                  key={r.roleId}
-                                  style={[
-                                    styles.optionPill,
-                                    { flex: 1, minWidth: 120, alignItems: "center" },
-                                    isSel && styles.optionPillActive,
-                                  ]}
-                                  onPress={() =>
-                                    setHumanReqs((prev) =>
-                                      prev.map((item) =>
-                                        item.id === req.id
-                                          ? { ...item, roleId: r.roleId, roleName: r.roleName }
-                                          : item
-                                      )
-                                    )
-                                  }
-                                >
-                                  <Text
+                            {roles
+                              .filter((r) => {
+                                const name = (r.roleName || "").toLowerCase();
+                                return name.includes("technician") || name.includes("seasonal");
+                              })
+                              .map((r) => {
+                                const isSel = req.roleId === r.roleId;
+                                const isTech = r.roleName.toLowerCase().includes("tech");
+                                const roleLabel = isTech ? "Technician" : "Seasonal Worker";
+                                return (
+                                  <TouchableOpacity
+                                    key={r.roleId}
                                     style={[
-                                      styles.optionPillText,
-                                      isSel && styles.optionPillTextActive,
+                                      styles.optionPill,
+                                      { flex: 1, minWidth: 120, alignItems: "center" },
+                                      isSel && styles.optionPillActive,
                                     ]}
+                                    onPress={() =>
+                                      setHumanReqs((prev) =>
+                                        prev.map((item) =>
+                                          item.id === req.id
+                                            ? { ...item, roleId: r.roleId, roleName: r.roleName }
+                                            : item
+                                        )
+                                      )
+                                    }
                                   >
-                                    {r.roleName === "Technician"
-                                      ? "Kỹ thuật viên"
-                                      : r.roleName === "Seasonal"
-                                      ? "Nhân sự Thời vụ"
-                                      : r.roleName}
-                                  </Text>
-                                </TouchableOpacity>
-                              );
-                            })}
+                                    <Text
+                                      style={[
+                                        styles.optionPillText,
+                                        isSel && styles.optionPillTextActive,
+                                      ]}
+                                    >
+                                      {roleLabel}
+                                    </Text>
+                                  </TouchableOpacity>
+                                );
+                              })}
                           </View>
                         </View>
 
-                        {/* Kỹ năng chuyên môn */}
+                        {/* Skills */}
                         <View style={styles.fieldGroup}>
-                          <Text style={styles.fieldLabel}>Kỹ năng chuyên môn (Tùy chọn)</Text>
+                          <Text style={styles.fieldLabel}>Required Skill (Optional)</Text>
                           <ScrollView
                             horizontal
                             showsHorizontalScrollIndicator={false}
@@ -1274,7 +1426,7 @@ export function CreateExperimentModal({
                                   req.requiredSkillId === null && styles.optionPillTextActive,
                                 ]}
                               >
-                                Không yêu cầu
+                                No specific skill
                               </Text>
                             </TouchableOpacity>
 
@@ -1312,10 +1464,10 @@ export function CreateExperimentModal({
                           </ScrollView>
                         </View>
 
-                        {/* Số lượng & Giờ công */}
+                        {/* Quantity & Working Hours */}
                         <View style={{ flexDirection: "row", gap: 10 }}>
                           <View style={[styles.fieldGroup, { flex: 1 }]}>
-                            <Text style={styles.fieldLabel}>Số người</Text>
+                            <Text style={styles.fieldLabel}>Headcount</Text>
                             <TextInput
                               style={styles.input}
                               keyboardType="numeric"
@@ -1333,7 +1485,7 @@ export function CreateExperimentModal({
                           </View>
 
                           <View style={[styles.fieldGroup, { flex: 1 }]}>
-                            <Text style={styles.fieldLabel}>Giờ công / ngày</Text>
+                            <Text style={styles.fieldLabel}>Hours / Day</Text>
                             <TextInput
                               style={styles.input}
                               keyboardType="numeric"
@@ -1359,7 +1511,7 @@ export function CreateExperimentModal({
 
                         {/* Note */}
                         <View style={styles.fieldGroup}>
-                          <Text style={styles.fieldLabel}>Ghi chú nhiệm vụ</Text>
+                          <Text style={styles.fieldLabel}>Task Notes</Text>
                           <TextInput
                             style={styles.input}
                             value={req.note}
@@ -1368,7 +1520,7 @@ export function CreateExperimentModal({
                                 prev.map((item) => (item.id === req.id ? { ...item, note: val } : item))
                               )
                             }
-                            placeholder="VD: Cần kinh nghiệm lấy mẫu đất rừng thực địa..."
+                            placeholder="e.g. Experienced in forestry soil sampling..."
                           />
                         </View>
                       </View>
@@ -1383,10 +1535,10 @@ export function CreateExperimentModal({
                 <View style={styles.cardHeader}>
                   <View style={styles.cardTitleRow}>
                     <Ionicons name="leaf" size={20} color="#16a34a" />
-                    <View>
-                      <Text style={styles.cardTitle}>Bước 5: Yêu cầu Đất Khảo nghiệm</Text>
+                    <View style={styles.cardTitleContainer}>
+                      <Text style={styles.cardTitle}>Step 5: Land Requirements</Text>
                       <Text style={styles.cardSubtitle}>
-                        Khai báo diện tích và điều kiện thổ nhưỡng
+                        Specify plot area and soil conditions
                       </Text>
                     </View>
                   </View>
@@ -1394,7 +1546,7 @@ export function CreateExperimentModal({
                   {landReqs.length === 0 ? (
                     <TouchableOpacity style={styles.addBtn} onPress={handleAddLandReq} activeOpacity={0.8}>
                       <Ionicons name="add" size={16} color={Colors.primary} />
-                      <Text style={styles.addBtnText}>Cấu hình Đất</Text>
+                      <Text style={styles.addBtnText}>Add Land</Text>
                     </TouchableOpacity>
                   ) : null}
                 </View>
@@ -1403,10 +1555,10 @@ export function CreateExperimentModal({
                   <View style={styles.emptyBox}>
                     <Ionicons name="map-outline" size={36} color="#94a3b8" />
                     <Text style={styles.emptyBoxText}>
-                      Chưa cấu hình yêu cầu đất (Tối đa 1 khu đất / đề tài)
+                      No land plot configured (Max 1 plot per experiment)
                     </Text>
                     <TouchableOpacity style={styles.addBtn} onPress={handleAddLandReq}>
-                      <Text style={styles.addBtnText}>+ Thêm yêu cầu đất khảo nghiệm</Text>
+                      <Text style={styles.addBtnText}>+ Add Land Requirement</Text>
                     </TouchableOpacity>
                   </View>
                 ) : (
@@ -1414,17 +1566,17 @@ export function CreateExperimentModal({
                     <View key={land.id} style={styles.itemRowCard}>
                       <View style={styles.itemRowTop}>
                         <View style={styles.itemBadge}>
-                          <Text style={styles.itemBadgeText}>Lô đất Khảo nghiệm</Text>
+                          <Text style={styles.itemBadgeText}>Trial Land Plot</Text>
                         </View>
                         <TouchableOpacity style={styles.removeBtn} onPress={handleRemoveLandReq}>
                           <Ionicons name="trash-outline" size={15} color="#dc2626" />
                         </TouchableOpacity>
                       </View>
 
-                      {/* Diện tích */}
+                      {/* Area */}
                       <View style={styles.fieldGroup}>
                         <Text style={styles.fieldLabel}>
-                          Diện tích yêu cầu (m²) <Text style={styles.requiredStar}>*</Text>
+                          Required Area (m²) <Text style={styles.requiredStar}>*</Text>
                         </Text>
                         <TextInput
                           style={styles.input}
@@ -1439,14 +1591,14 @@ export function CreateExperimentModal({
                               )
                             )
                           }
-                          placeholder="VD: 500"
+                          placeholder="e.g. 500"
                         />
                       </View>
 
-                      {/* Loại thổ nhưỡng */}
+                      {/* Soil type */}
                       <View style={styles.fieldGroup}>
                         <Text style={styles.fieldLabel}>
-                          Loại thổ nhưỡng yêu cầu <Text style={styles.requiredStar}>*</Text>
+                          Required Soil Type <Text style={styles.requiredStar}>*</Text>
                         </Text>
                         <ScrollView
                           horizontal
@@ -1483,7 +1635,7 @@ export function CreateExperimentModal({
 
                       {/* Note */}
                       <View style={styles.fieldGroup}>
-                        <Text style={styles.fieldLabel}>Yêu cầu địa hình & Ghi chú</Text>
+                        <Text style={styles.fieldLabel}>Terrain & Notes</Text>
                         <TextInput
                           style={styles.input}
                           value={land.note}
@@ -1494,7 +1646,7 @@ export function CreateExperimentModal({
                               )
                             )
                           }
-                          placeholder="VD: Thuộc tiểu khu 4B, độ dốc < 15 độ..."
+                          placeholder="e.g. Sub-compartment 4B, slope < 15 degrees..."
                         />
                       </View>
                     </View>
@@ -1519,7 +1671,7 @@ export function CreateExperimentModal({
                 activeOpacity={0.8}
               >
                 <Ionicons name="arrow-back" size={16} color="#475569" />
-                <Text style={styles.prevBtnText}>Quay lại</Text>
+                <Text style={styles.prevBtnText}>Back</Text>
               </TouchableOpacity>
             ) : null}
 
@@ -1530,7 +1682,7 @@ export function CreateExperimentModal({
                 disabled={saving}
                 activeOpacity={0.8}
               >
-                <Text style={styles.nextBtnText}>Tiếp tục</Text>
+                <Text style={styles.nextBtnText}>Next</Text>
                 <Ionicons name="arrow-forward" size={16} color="#ffffff" />
               </TouchableOpacity>
             ) : (
@@ -1545,7 +1697,7 @@ export function CreateExperimentModal({
                 ) : (
                   <>
                     <Ionicons name="save-outline" size={18} color="#ffffff" />
-                    <Text style={styles.savePlanBtnText}>Lưu Bản nháp Đề tài</Text>
+                    <Text style={styles.savePlanBtnText}>Save Experiment Draft</Text>
                   </>
                 )}
               </TouchableOpacity>

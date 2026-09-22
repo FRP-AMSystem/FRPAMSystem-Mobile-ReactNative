@@ -16,6 +16,7 @@ import { getExperiments } from "../../api/experimentApi";
 import { CreateExperimentModal } from "../../components/CreateExperimentModal";
 import { ExperimentDetailModal } from "../../components/ExperimentDetailModal";
 import { Colors } from "../../constants/colors";
+import { useAuth } from "../../context/AuthContext";
 import { styles } from "../../styles/experiments.styles";
 import { ExperimentItem, ExperimentStatus } from "../../types/experiment";
 
@@ -32,6 +33,7 @@ function formatDate(dateStr?: string | null): string {
 }
 
 export default function ExperimentsScreen() {
+  const { isManager, isResearcher, isAdmin, user } = useAuth();
   const [experiments, setExperiments] = useState<ExperimentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -46,16 +48,24 @@ export default function ExperimentsScreen() {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await getExperiments();
-      setExperiments(data || []);
+      const params: any = {};
+      if (isResearcher && !isManager && !isAdmin && user?.userId) {
+        params.ResearcherId = user.userId;
+      }
+      const data = await getExperiments(params);
+      let list = data || [];
+      if (isResearcher && !isManager && !isAdmin && user?.userId) {
+        list = list.filter((exp) => !exp.researcherId || exp.researcherId === user.userId);
+      }
+      setExperiments(list);
     } catch (err: any) {
       console.error(err);
-      Alert.alert("Lỗi", "Không thể tải danh sách đề tài thử nghiệm.");
+      Alert.alert("Error", "Failed to load experiment list.");
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [isResearcher, isManager, isAdmin, user?.userId]);
 
   useEffect(() => {
     loadData();
@@ -84,18 +94,18 @@ export default function ExperimentsScreen() {
   const getStatusBadge = (status?: ExperimentStatus) => {
     switch (status) {
       case "Running":
-        return { label: "Đang chạy", bg: "#f0fdf4", text: "#15803d", border: "#86efac" };
+        return { label: "Running", bg: "#f0fdf4", text: "#15803d", border: "#86efac" };
       case "Approved":
-        return { label: "Đã duyệt", bg: "#eff6ff", text: "#1d4ed8", border: "#bfdbfe" };
+        return { label: "Approved", bg: "#eff6ff", text: "#1d4ed8", border: "#bfdbfe" };
       case "Pending":
-        return { label: "Chờ duyệt", bg: "#fffbeb", text: "#b45309", border: "#fde68a" };
+        return { label: "Pending", bg: "#fffbeb", text: "#b45309", border: "#fde68a" };
       case "Completed":
-        return { label: "Hoàn tất", bg: "#faf5ff", text: "#7e22ce", border: "#e9d5ff" };
+        return { label: "Completed", bg: "#faf5ff", text: "#7e22ce", border: "#e9d5ff" };
       case "Rejected":
-        return { label: "Từ chối", bg: "#fef2f2", text: "#b91c1c", border: "#fca5a5" };
+        return { label: "Rejected", bg: "#fef2f2", text: "#b91c1c", border: "#fca5a5" };
       case "Draft":
       default:
-        return { label: "Bản nháp", bg: "#f1f5f9", text: "#475569", border: "#cbd5e1" };
+        return { label: "Draft", bg: "#f1f5f9", text: "#475569", border: "#cbd5e1" };
     }
   };
 
@@ -104,18 +114,20 @@ export default function ExperimentsScreen() {
       {/* Top Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>Đề tài Nghiên cứu</Text>
-          <Text style={styles.headerSubtitle}>Quản lý và theo dõi tiến độ khảo nghiệm lâm nghiệp</Text>
+          <Text style={styles.headerTitle}>Research Experiments</Text>
+          <Text style={styles.headerSubtitle}>Manage and track forestry trial progress</Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.createHeaderBtn}
-          onPress={() => setCreateModalVisible(true)}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="add" size={18} color="#ffffff" />
-          <Text style={styles.createHeaderBtnText}>Tạo mới</Text>
-        </TouchableOpacity>
+        {!isManager && (
+          <TouchableOpacity
+            style={styles.createHeaderBtn}
+            onPress={() => setCreateModalVisible(true)}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="add" size={18} color="#ffffff" />
+            <Text style={styles.createHeaderBtnText}>Create New</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Search Bar */}
@@ -123,7 +135,7 @@ export default function ExperimentsScreen() {
         <Ionicons name="search-outline" size={18} color={Colors.textMuted} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Tìm theo tên đề tài, mục tiêu nghiên cứu..."
+          placeholder="Search by experiment name, objectives..."
           placeholderTextColor="#94a3b8"
           value={searchTerm}
           onChangeText={setSearchTerm}
@@ -143,12 +155,12 @@ export default function ExperimentsScreen() {
         contentContainerStyle={styles.tabFilterRow}
       >
         {[
-          { key: "all", label: "Tất cả" },
-          { key: "Running", label: "Đang chạy" },
-          { key: "Draft", label: "Bản nháp" },
-          { key: "Pending", label: "Chờ duyệt" },
-          { key: "Approved", label: "Đã duyệt" },
-          { key: "Completed", label: "Hoàn tất" },
+          { key: "all", label: "All" },
+          { key: "Running", label: "Running" },
+          { key: "Draft", label: "Draft" },
+          { key: "Pending", label: "Pending" },
+          { key: "Approved", label: "Approved" },
+          { key: "Completed", label: "Completed" },
         ].map((t) => (
           <TouchableOpacity
             key={t.key}
@@ -166,15 +178,19 @@ export default function ExperimentsScreen() {
       {loading ? (
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={styles.loadingText}>Đang tải danh sách đề tài...</Text>
+          <Text style={styles.loadingText}>Loading experiments...</Text>
         </View>
       ) : filteredExperiments.length === 0 ? (
         <View style={styles.centerContainer}>
           <View style={styles.emptyIconBox}>
             <Ionicons name="flask-outline" size={36} color={Colors.textMuted} />
           </View>
-          <Text style={styles.emptyTitle}>Chưa có đề tài nào</Text>
-          <Text style={styles.emptyText}>Bấm nút "Tạo mới" để đăng ký đề tài thử nghiệm lâm nghiệp.</Text>
+          <Text style={styles.emptyTitle}>No experiments found</Text>
+          <Text style={styles.emptyText}>
+            {!isManager
+              ? 'Tap "Create New" to register a forestry experiment.'
+              : "No experiments currently available in this category."}
+          </Text>
         </View>
       ) : (
         <FlatList
@@ -212,23 +228,23 @@ export default function ExperimentsScreen() {
                 <View style={styles.infoRow}>
                   <Ionicons name="calendar-outline" size={14} color={Colors.textSecondary} />
                   <Text style={styles.infoText}>
-                    Thời gian: {formatDate(item.expectStartDate)} đến {formatDate(item.expectEndDate)}
+                    Timeline: {formatDate(item.expectStartDate)} to {formatDate(item.expectEndDate)}
                   </Text>
                 </View>
 
                 {item.researcherName ? (
                   <View style={styles.infoRow}>
                     <Ionicons name="person-outline" size={14} color={Colors.textSecondary} />
-                    <Text style={styles.infoText}>Chủ nhiệm: {item.researcherName}</Text>
+                    <Text style={styles.infoText}>Lead Researcher: {item.researcherName}</Text>
                   </View>
                 ) : null}
 
                 <View style={styles.cardFooter}>
                   <Text style={{ fontSize: 11.5, color: Colors.textMuted }}>
-                    Hạn chót: {formatDate(item.deadline)}
+                    Deadline: {formatDate(item.deadline)}
                   </Text>
                   <View style={styles.detailLink}>
-                    <Text style={styles.detailLinkText}>Chi tiết đề tài</Text>
+                    <Text style={styles.detailLinkText}>View Details</Text>
                     <Ionicons name="chevron-forward" size={13} color={Colors.primary} />
                   </View>
                 </View>
@@ -246,11 +262,13 @@ export default function ExperimentsScreen() {
         onSuccess={loadData}
       />
 
-      <CreateExperimentModal
-        visible={createModalVisible}
-        onClose={() => setCreateModalVisible(false)}
-        onSuccess={loadData}
-      />
+      {!isManager && (
+        <CreateExperimentModal
+          visible={createModalVisible}
+          onClose={() => setCreateModalVisible(false)}
+          onSuccess={loadData}
+        />
+      )}
     </SafeAreaView>
   );
 }

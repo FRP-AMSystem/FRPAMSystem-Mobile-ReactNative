@@ -36,24 +36,24 @@ interface RoleConfig {
 
 function getRoleLabel(roleName: string): string {
   const r = roleName.toLowerCase();
-  if (r.includes("admin")) return "Quản trị viên";
-  if (r.includes("manager")) return "Quản lý";
-  if (r.includes("research")) return "Nghiên cứu viên";
-  if (r.includes("tech")) return "Kỹ thuật viên";
-  if (r.includes("season")) return "Thời vụ";
-  if (r.includes("student")) return "Học viên";
+  if (r.includes("admin")) return "Administrator";
+  if (r.includes("manager")) return "Manager";
+  if (r.includes("research")) return "Researcher";
+  if (r.includes("tech")) return "Technician";
+  if (r.includes("season")) return "Seasonal Worker";
+  if (r.includes("student")) return "Student / Intern";
   return roleName;
 }
 
 function getRoleDescription(roleName: string): string {
   const r = roleName.toLowerCase();
-  if (r.includes("admin")) return "Toàn quyền hệ thống & tài khoản";
-  if (r.includes("manager")) return "Duyệt đề tài, phân bổ & tài nguyên";
-  if (r.includes("research")) return "Lập đề tài & tối ưu phân bổ";
-  if (r.includes("tech")) return "Vận hành & bảo dưỡng thiết bị";
-  if (r.includes("season")) return "Thực hiện nhiệm vụ theo ca";
-  if (r.includes("student")) return "Tham gia đề tài & thực tập";
-  return "Thành viên hệ thống";
+  if (r.includes("admin")) return "Full system & account administration";
+  if (r.includes("manager")) return "Approve experiments, plans & resources";
+  if (r.includes("research")) return "Draft experiments & optimize allocations";
+  if (r.includes("tech")) return "Operate & maintain specialized equipment";
+  if (r.includes("season")) return "Perform shift-based field tasks";
+  if (r.includes("student")) return "Participate in research & internships";
+  return "System member";
 }
 
 export const CreateUserModal: React.FC<CreateUserModalProps> = ({
@@ -113,19 +113,19 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
   const handleSubmit = async () => {
     if (!fullName.trim()) {
-      Alert.alert("Lỗi", "Vui lòng nhập họ và tên.");
+      Alert.alert("Error", "Please enter the full name.");
       return;
     }
     if (!username.trim()) {
-      Alert.alert("Lỗi", "Vui lòng nhập tên đăng nhập.");
+      Alert.alert("Error", "Please enter the username.");
       return;
     }
     if (!email.trim() || !email.includes("@")) {
-      Alert.alert("Lỗi", "Vui lòng nhập email hợp lệ.");
+      Alert.alert("Error", "Please enter a valid email address.");
       return;
     }
     if (!password.trim() || password.length < 6) {
-      Alert.alert("Lỗi", "Mật khẩu phải có ít nhất 6 ký tự.");
+      Alert.alert("Error", "Password must be at least 6 characters.");
       return;
     }
 
@@ -173,9 +173,9 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
               <Ionicons name="person-add" size={22} color={Colors.primary} />
             </View>
             <View style={styles.headerTextWrap}>
-              <Text style={styles.title}>Tạo tài khoản người dùng</Text>
+              <Text style={styles.title}>Create User Account</Text>
               <Text style={styles.subtitle}>
-                Thêm nhân sự mới vào hệ thống FRPAM
+                Add new personnel to the FRPAM system
               </Text>
             </View>
             <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
@@ -188,10 +188,10 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
             contentContainerStyle={styles.scrollBody}
             keyboardShouldPersistTaps="handled"
           >
-            {/* Họ và tên */}
+            {/* Full Name */}
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>
-                Họ và tên <Text style={styles.required}>*</Text>
+                Full Name <Text style={styles.required}>*</Text>
               </Text>
               <View style={styles.inputWrapper}>
                 <Ionicons
@@ -202,7 +202,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 />
                 <TextInput
                   style={styles.input}
-                  placeholder="Ví dụ: Nguyễn Văn An"
+                  placeholder="e.g. John Doe"
                   placeholderTextColor="#94a3b8"
                   value={fullName}
                   onChangeText={setFullName}
@@ -210,10 +210,10 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
               </View>
             </View>
 
-            {/* Tên đăng nhập */}
+            {/* Username */}
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>
-                Tên đăng nhập <Text style={styles.required}>*</Text>
+                Username <Text style={styles.required}>*</Text>
               </Text>
               <View style={styles.inputWrapper}>
                 <Ionicons
@@ -224,7 +224,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 />
                 <TextInput
                   style={styles.input}
-                  placeholder="Ví dụ: an.nguyen"
+                  placeholder="e.g. john.doe"
                   placeholderTextColor="#94a3b8"
                   autoCapitalize="none"
                   value={username}
@@ -236,7 +236,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
             {/* Email */}
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>
-                Email công vụ <Text style={styles.required}>*</Text>
+                Work Email <Text style={styles.required}>*</Text>
               </Text>
               <View style={styles.inputWrapper}>
                 <Ionicons
@@ -247,7 +247,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 />
                 <TextInput
                   style={styles.input}
-                  placeholder="Ví dụ: an.nguyen@forestry.vn"
+                  placeholder="e.g. john.doe@forestry.vn"
                   placeholderTextColor="#94a3b8"
                   keyboardType="email-address"
                   autoCapitalize="none"
@@ -257,10 +257,10 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
               </View>
             </View>
 
-            {/* Mật khẩu */}
+            {/* Password */}
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>
-                Mật khẩu khởi tạo <Text style={styles.required}>*</Text>
+                Initial Password <Text style={styles.required}>*</Text>
               </Text>
               <View style={styles.inputWrapper}>
                 <Ionicons
@@ -271,7 +271,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 />
                 <TextInput
                   style={styles.input}
-                  placeholder="Tối thiểu 6 ký tự"
+                  placeholder="Minimum 6 characters"
                   placeholderTextColor="#94a3b8"
                   secureTextEntry={!showPassword}
                   value={password}
@@ -290,10 +290,10 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
               </View>
             </View>
 
-            {/* Chọn vai trò */}
+            {/* Select Role */}
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>
-                Vai trò phân quyền <Text style={styles.required}>*</Text>
+                Role & Permission <Text style={styles.required}>*</Text>
               </Text>
               <View style={styles.roleGrid}>
                 {roles.map((r) => {
@@ -333,9 +333,9 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
               </View>
             </View>
 
-            {/* Số điện thoại */}
+            {/* Phone Number */}
             <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Số điện thoại (Tùy chọn)</Text>
+              <Text style={styles.label}>Phone Number (Optional)</Text>
               <View style={styles.inputWrapper}>
                 <Ionicons
                   name="call-outline"
@@ -345,7 +345,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 />
                 <TextInput
                   style={styles.input}
-                  placeholder="Ví dụ: 0987654321"
+                  placeholder="e.g. 0987654321"
                   placeholderTextColor="#94a3b8"
                   keyboardType="phone-pad"
                   value={phoneNumber}
@@ -354,9 +354,9 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
               </View>
             </View>
 
-            {/* Bộ môn / Phòng ban */}
+            {/* Department */}
             <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Bộ môn / Phòng ban (Tùy chọn)</Text>
+              <Text style={styles.label}>Department (Optional)</Text>
               <View style={styles.inputWrapper}>
                 <Ionicons
                   name="business-outline"
@@ -366,7 +366,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 />
                 <TextInput
                   style={styles.input}
-                  placeholder="Ví dụ: Bộ môn Giống cây rừng"
+                  placeholder="e.g. Tree Breeding Division"
                   placeholderTextColor="#94a3b8"
                   value={department}
                   onChangeText={setDepartment}
@@ -382,7 +382,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
               onPress={handleClose}
               disabled={loading}
             >
-              <Text style={styles.cancelBtnText}>Hủy</Text>
+              <Text style={styles.cancelBtnText}>Cancel</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -396,7 +396,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
               ) : (
                 <>
                   <Ionicons name="checkmark-circle" size={18} color="#ffffff" />
-                  <Text style={styles.submitBtnText}>Tạo tài khoản</Text>
+                  <Text style={styles.submitBtnText}>Create User</Text>
                 </>
               )}
             </TouchableOpacity>

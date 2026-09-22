@@ -59,7 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!ALLOWED_MOBILE_ROLES.includes(userRole)) {
       return {
         success: false,
-        message: `Tài khoản role "${userRole}" không được phép dùng Mobile App. Vui lòng đăng nhập trên hệ thống Web (chỉ dành cho Technician / Seasonal).`,
+        message: `Account with role "${userRole}" is not permitted to use the Mobile App. Please log in on the Web system.`,
       };
     }
 

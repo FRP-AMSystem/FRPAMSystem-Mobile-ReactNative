@@ -17,13 +17,13 @@ import { Colors } from "../../constants/colors";
 import { styles } from "../../styles/admin-logs.styles";
 
 const MODULE_FILTERS = [
-  { key: "all", label: "Tất cả" },
-  { key: "Auth", label: "Xác thực" },
-  { key: "Experiment", label: "Đề tài" },
-  { key: "AllocationPlan", label: "Phân bổ" },
-  { key: "Equipment", label: "Thiết bị" },
-  { key: "User", label: "Người dùng" },
-  { key: "Schedule", label: "Lịch trực" },
+  { key: "all", label: "All" },
+  { key: "Auth", label: "Auth" },
+  { key: "Experiment", label: "Experiment" },
+  { key: "AllocationPlan", label: "Allocation" },
+  { key: "Equipment", label: "Equipment" },
+  { key: "User", label: "User" },
+  { key: "Schedule", label: "Schedule" },
 ];
 
 export default function AdminLogsScreen() {
@@ -78,7 +78,7 @@ export default function AdminLogsScreen() {
     if (!timeStr) return "";
     try {
       const d = new Date(timeStr);
-      return d.toLocaleTimeString("vi-VN", {
+      return d.toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
         day: "2-digit",
@@ -98,9 +98,9 @@ export default function AdminLogsScreen() {
     >
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Nhật ký Hoạt động (Audit Logs)</Text>
+        <Text style={styles.title}>Audit Logs</Text>
         <Text style={styles.subtitle}>
-          Theo dõi giám sát mọi thao tác và sự kiện trên hệ thống
+          Monitor system operations and security events
         </Text>
 
         {/* Module Filters */}
@@ -133,7 +133,7 @@ export default function AdminLogsScreen() {
           <Ionicons name="search" size={18} color="#94a3b8" />
           <TextInput
             style={styles.searchInput}
-            placeholder="Tìm theo hành động, người thực hiện, phân hệ..."
+            placeholder="Search by action, user, module, details..."
             placeholderTextColor="#94a3b8"
             value={search}
             onChangeText={setSearch}
@@ -150,7 +150,7 @@ export default function AdminLogsScreen() {
       {loading ? (
         <View style={styles.centerLoading}>
           <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={styles.loadingText}>Đang tải nhật ký hệ thống...</Text>
+          <Text style={styles.loadingText}>Loading audit logs...</Text>
         </View>
       ) : (
         <FlatList
@@ -170,7 +170,7 @@ export default function AdminLogsScreen() {
           ListEmptyComponent={
             <View style={styles.emptyWrap}>
               <Ionicons name="shield-outline" size={48} color="#cbd5e1" />
-              <Text style={styles.emptyText}>Không tìm thấy nhật ký hoạt động phù hợp.</Text>
+              <Text style={styles.emptyText}>No matching audit logs found.</Text>
             </View>
           }
           renderItem={({ item }) => {
@@ -186,7 +186,7 @@ export default function AdminLogsScreen() {
                 <View style={styles.logCardTop}>
                   <View style={styles.modulePill}>
                     <Text style={styles.moduleText}>
-                      {item.module || "Hệ thống"}
+                      {item.module || "General"}
                     </Text>
                   </View>
                   <Text style={styles.timestampText}>
@@ -206,10 +206,10 @@ export default function AdminLogsScreen() {
                   <View style={styles.userWrap}>
                     <Ionicons name="person-circle-outline" size={16} color="#64748b" />
                     <Text style={styles.userNameText}>
-                      {item.userFullName || item.username || "Hệ thống"}
+                      {item.userFullName || item.username || "System"}
                     </Text>
                   </View>
-                  <Text style={styles.viewDetailText}>Chi tiết →</Text>
+                  <Text style={styles.viewDetailText}>Details →</Text>
                 </View>
               </TouchableOpacity>
             );

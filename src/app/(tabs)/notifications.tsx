@@ -32,7 +32,7 @@ function getNotificationVisuals(item: NotificationItem) {
 
   if (type.includes("Schedule") || refType === "Schedule") {
     return {
-      categoryLabel: "Lịch Ca trực",
+      categoryLabel: "Shift Schedule",
       icon: "calendar" as const,
       iconColor: "#2563eb",
       iconBg: "#eff6ff",
@@ -43,7 +43,7 @@ function getNotificationVisuals(item: NotificationItem) {
   }
   if (type.includes("Experiment") || refType === "Experiment") {
     return {
-      categoryLabel: "Đề tài Thử nghiệm",
+      categoryLabel: "Research Experiment",
       icon: "flask" as const,
       iconColor: "#16a34a",
       iconBg: "#f0fdf4",
@@ -54,7 +54,7 @@ function getNotificationVisuals(item: NotificationItem) {
   }
   if (type.includes("Allocation") || refType === "AllocationPlan") {
     return {
-      categoryLabel: "Phân bổ Tài nguyên",
+      categoryLabel: "Resource Allocation",
       icon: "git-network" as const,
       iconColor: "#9333ea",
       iconBg: "#faf5ff",
@@ -65,7 +65,7 @@ function getNotificationVisuals(item: NotificationItem) {
   }
   if (type.includes("Equipment") || refType?.includes("Equipment")) {
     return {
-      categoryLabel: "Bàn giao Thiết bị",
+      categoryLabel: "Machinery Handover",
       icon: "construct" as const,
       iconColor: "#d97706",
       iconBg: "#fffbeb",
@@ -75,8 +75,8 @@ function getNotificationVisuals(item: NotificationItem) {
     };
   }
   return {
-    label: "Thông báo Hệ thống",
-    categoryLabel: "Thông báo Hệ thống",
+    label: "System Notification",
+    categoryLabel: "System Notification",
     icon: "notifications" as const,
     iconColor: "#475569",
     iconBg: "#f1f5f9",
@@ -117,7 +117,7 @@ export default function NotificationsScreen() {
       setNotifications(data || []);
     } catch (err: any) {
       console.error(err);
-      Alert.alert("Lỗi", "Không thể tải danh sách thông báo.");
+      Alert.alert("Error", "Failed to load notifications.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -140,7 +140,7 @@ export default function NotificationsScreen() {
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
     } catch (err) {
       console.error(err);
-      Alert.alert("Lỗi", "Không thể đánh dấu tất cả thông báo.");
+      Alert.alert("Error", "Failed to mark all notifications as read.");
     } finally {
       setMarkingAll(false);
     }
@@ -156,7 +156,7 @@ export default function NotificationsScreen() {
       setSelectedSchedule(sched);
     } catch (err: any) {
       console.error("Fetch schedule error:", err);
-      Alert.alert("Lỗi", "Không thể tải chi tiết ca trực này.");
+      Alert.alert("Error", "Failed to load shift details.");
       setScheduleModalVisible(false);
     } finally {
       setScheduleLoading(false);
@@ -171,7 +171,7 @@ export default function NotificationsScreen() {
       setSelectedExp(exp);
     } catch (err: any) {
       console.error("Fetch experiment error:", err);
-      Alert.alert("Lỗi", "Không thể tải chi tiết đề tài nghiên cứu này.");
+      Alert.alert("Error", "Failed to load experiment details.");
       setExpModalVisible(false);
     }
   };
@@ -185,7 +185,7 @@ export default function NotificationsScreen() {
       setSelectedPlan(plan);
     } catch (err: any) {
       console.error("Fetch plan error:", err);
-      Alert.alert("Lỗi", "Không thể tải chi tiết kế hoạch phân bổ này.");
+      Alert.alert("Error", "Failed to load allocation plan details.");
       setPlanModalVisible(false);
     } finally {
       setPlanLoading(false);
@@ -231,8 +231,8 @@ export default function NotificationsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTextGroup}>
-          <Text style={styles.title}>Thông báo hệ thống</Text>
-          <Text style={styles.subtitle}>Cập nhật điều phối ca trực và đề tài lâm nghiệp</Text>
+          <Text style={styles.title}>System Notifications</Text>
+          <Text style={styles.subtitle}>Updates on shifts, allocations, and forestry experiments</Text>
         </View>
 
         {unreadCount > 0 ? (
@@ -247,7 +247,7 @@ export default function NotificationsScreen() {
             ) : (
               <>
                 <Ionicons name="checkmark-done" size={15} color={Colors.primary} />
-                <Text style={styles.markAllText}>Đã đọc hết</Text>
+                <Text style={styles.markAllText}>Mark all read</Text>
               </>
             )}
           </TouchableOpacity>
@@ -258,15 +258,15 @@ export default function NotificationsScreen() {
       {loading ? (
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={styles.loadingText}>Đang tải thông báo...</Text>
+          <Text style={styles.loadingText}>Loading notifications...</Text>
         </View>
       ) : notifications.length === 0 ? (
         <View style={styles.centerContainer}>
           <View style={styles.emptyIconBox}>
             <Ionicons name="notifications-off-outline" size={36} color={Colors.textMuted} />
           </View>
-          <Text style={styles.emptyTitle}>Chưa có thông báo nào</Text>
-          <Text style={styles.emptyText}>Các cập nhật đề tài và nhiệm vụ sẽ xuất hiện tại đây.</Text>
+          <Text style={styles.emptyTitle}>No notifications yet</Text>
+          <Text style={styles.emptyText}>Updates for experiments and tasks will appear here.</Text>
         </View>
       ) : (
         <FlatList
@@ -307,7 +307,7 @@ export default function NotificationsScreen() {
                     <View style={styles.topRightRow}>
                       <Text style={styles.timeText}>
                         {item.createdAt
-                          ? new Date(item.createdAt).toLocaleDateString("vi-VN", {
+                          ? new Date(item.createdAt).toLocaleDateString("en-US", {
                               day: "2-digit",
                               month: "2-digit",
                               hour: "2-digit",
@@ -333,7 +333,7 @@ export default function NotificationsScreen() {
                   {hasDirectLink ? (
                     <View style={styles.actionHintRow}>
                       <Ionicons name="arrow-forward-circle-outline" size={14} color={Colors.primary} />
-                      <Text style={styles.actionHintText}>Bấm để xem chi tiết hạng mục</Text>
+                      <Text style={styles.actionHintText}>Tap to view details</Text>
                     </View>
                   ) : null}
                 </View>

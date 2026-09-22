@@ -23,8 +23,8 @@ export async function getAreas(): Promise<AreaItem[]> {
 
     return rawList.map((item: any) => ({
       areaId: Number(item.areaId ?? item.id ?? 0),
-      areaName: item.areaName || item.name || `Phân khu #${item.areaId || item.id}`,
-      description: item.description || item.soilType || "Khu vực khảo nghiệm thực địa",
+      areaName: item.areaName || item.name || `Sub-area #${item.areaId || item.id}`,
+      description: item.description || item.soilType || "Field experiment area",
       location: item.location || "",
       totalArea: Number(item.totalArea ?? item.areaSize ?? item.size ?? 0),
       soilType: item.soilType || "",

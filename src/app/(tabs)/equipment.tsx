@@ -44,7 +44,7 @@ export default function EquipmentScreen() {
       setItems(data || []);
     } catch (err: any) {
       console.error(err);
-      Alert.alert("Lỗi", "Không thể tải danh sách thiết bị hiện trường.");
+      Alert.alert("Error", "Failed to load field equipment list.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -66,12 +66,12 @@ export default function EquipmentScreen() {
       setActionLoadingId(item.allocationEquipmentDetailId);
       await handoverEquipment(item.allocationEquipmentDetailId);
       Alert.alert(
-        "Tiếp nhận thành công!",
-        `Thiết bị "${item.allocatedEquipmentTypeName || item.assetCode}" đã được chuyển sang trạng thái Đang sử dụng (In Use).`
+        "Handover Successful!",
+        `Equipment "${item.allocatedEquipmentTypeName || item.assetCode}" has been set to In Use status.`
       );
       await loadData();
     } catch (err: any) {
-      Alert.alert("Lỗi", err?.response?.data?.message || "Không thể tiếp nhận thiết bị.");
+      Alert.alert("Error", err?.response?.data?.message || "Failed to accept equipment.");
     } finally {
       setActionLoadingId(null);
     }
@@ -84,14 +84,14 @@ export default function EquipmentScreen() {
       setActionLoadingId(returnItem.allocationEquipmentDetailId);
       await returnEquipment(returnItem.allocationEquipmentDetailId);
       Alert.alert(
-        "Hoàn trả thành công!",
-        `Thiết bị "${returnItem.allocatedEquipmentTypeName || returnItem.assetCode}" đã được hoàn trả về kho (Available).`
+        "Return Successful!",
+        `Equipment "${returnItem.allocatedEquipmentTypeName || returnItem.assetCode}" has been returned to storage (Available).`
       );
       setReturnItem(null);
       setReturnNotes("");
       await loadData();
     } catch (err: any) {
-      Alert.alert("Lỗi", err?.response?.data?.message || "Không thể hoàn trả thiết bị.");
+      Alert.alert("Error", err?.response?.data?.message || "Failed to return equipment.");
     } finally {
       setActionLoadingId(null);
     }
@@ -122,14 +122,14 @@ export default function EquipmentScreen() {
   // Status Badge Helper
   const renderStatusBadge = (status: string) => {
     let conf = Colors.status.allocated;
-    let label = "Được cấp";
+    let label = "Allocated";
 
     if (status === "InUse") {
       conf = Colors.status.inUse;
-      label = "Đang dùng";
+      label = "In Use";
     } else if (status === "Completed") {
       conf = Colors.status.completed;
-      label = "Đã hoàn trả";
+      label = "Returned";
     }
 
     return (
@@ -144,9 +144,9 @@ export default function EquipmentScreen() {
       {/* Top Header */}
       <View style={styles.topHeader}>
         <View>
-          <Text style={styles.greeting}>Xin chào, {user?.fullName || "Cán bộ hiện trường"}</Text>
+          <Text style={styles.greeting}>Hello, {user?.fullName || "Field Staff"}</Text>
           <Text style={styles.roleSubtext}>
-            Vai trò: {role === "Technician" ? "Kỹ thuật viên hiện trường" : "Nhân viên thời vụ"}
+            Role: {role === "Technician" ? "Field Technician" : "Seasonal Staff"}
           </Text>
         </View>
         <TouchableOpacity style={styles.refreshIconBtn} onPress={onRefresh}>
@@ -159,7 +159,7 @@ export default function EquipmentScreen() {
         <Ionicons name="search-outline" size={18} color={Colors.textMuted} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Tìm theo tên máy, mã tài sản, thí nghiệm..."
+          placeholder="Search by equipment name, asset code, experiment..."
           placeholderTextColor="#94a3b8"
           value={searchTerm}
           onChangeText={setSearchTerm}
@@ -174,10 +174,10 @@ export default function EquipmentScreen() {
       {/* Filter Tabs */}
       <View style={styles.tabFilterRow}>
         {[
-          { key: "all", label: "Tất cả" },
-          { key: "allocated", label: "Được cấp" },
-          { key: "inuse", label: "Đang dùng" },
-          { key: "completed", label: "Hoàn tất" },
+          { key: "all", label: "All" },
+          { key: "allocated", label: "Allocated" },
+          { key: "inuse", label: "In Use" },
+          { key: "completed", label: "Completed" },
         ].map((t) => (
           <TouchableOpacity
             key={t.key}
@@ -195,12 +195,12 @@ export default function EquipmentScreen() {
       {loading ? (
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={styles.loadingText}>Đang tải thiết bị phân bổ...</Text>
+          <Text style={styles.loadingText}>Loading allocated equipment...</Text>
         </View>
       ) : filteredItems.length === 0 ? (
         <View style={styles.centerContainer}>
           <Ionicons name="cube-outline" size={48} color={Colors.textMuted} />
-          <Text style={styles.emptyText}>Không tìm thấy thiết bị phù hợp.</Text>
+          <Text style={styles.emptyText}>No matching equipment found.</Text>
         </View>
       ) : (
         <FlatList
@@ -218,7 +218,7 @@ export default function EquipmentScreen() {
                 <View style={styles.cardHeader}>
                   <View style={styles.cardTitleWrap}>
                     <Text style={styles.equipmentName}>
-                      {item.allocatedEquipmentTypeName || "Thiết bị lâm nghiệp"}
+                      {item.allocatedEquipmentTypeName || "Forestry Equipment"}
                     </Text>
                     {item.assetCode ? (
                       <View style={styles.assetBadge}>
@@ -250,7 +250,7 @@ export default function EquipmentScreen() {
                 <View style={styles.infoRow}>
                   <Ionicons name="calendar-outline" size={14} color={Colors.textSecondary} />
                   <Text style={styles.infoText}>
-                    Hạn dùng: {item.startDate ? item.startDate.split("T")[0] : "-"} đến{" "}
+                    Valid: {item.startDate ? item.startDate.split("T")[0] : "-"} to{" "}
                     {item.endDate ? item.endDate.split("T")[0] : "-"}
                   </Text>
                 </View>
@@ -268,7 +268,7 @@ export default function EquipmentScreen() {
                       ) : (
                         <>
                           <Ionicons name="checkmark-circle-outline" size={16} color="#ffffff" />
-                          <Text style={styles.handoverBtnText}>Tiếp nhận thiết bị</Text>
+                          <Text style={styles.handoverBtnText}>Accept Equipment</Text>
                         </>
                       )}
                     </TouchableOpacity>
@@ -289,7 +289,7 @@ export default function EquipmentScreen() {
                       ) : (
                         <>
                           <Ionicons name="return-down-back-outline" size={16} color="#ffffff" />
-                          <Text style={styles.returnBtnText}>Hoàn trả về kho</Text>
+                          <Text style={styles.returnBtnText}>Return to Storage</Text>
                         </>
                       )}
                     </TouchableOpacity>
@@ -298,7 +298,7 @@ export default function EquipmentScreen() {
                   {item.status === "Completed" ? (
                     <View style={styles.completedNote}>
                       <Ionicons name="checkmark-done" size={16} color={Colors.primary} />
-                      <Text style={styles.completedNoteText}>Đã hoàn tất trả về kho</Text>
+                      <Text style={styles.completedNoteText}>Returned to storage</Text>
                     </View>
                   ) : null}
                 </View>
@@ -313,18 +313,18 @@ export default function EquipmentScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Xác nhận hoàn trả thiết bị</Text>
+              <Text style={styles.modalTitle}>Confirm Equipment Return</Text>
               <TouchableOpacity onPress={() => setReturnItem(null)}>
                 <Ionicons name="close" size={20} color={Colors.textMuted} />
               </TouchableOpacity>
             </View>
 
             <Text style={styles.modalSubtitle}>
-              Mã máy: <Text style={{ fontWeight: "700", color: Colors.text }}>{returnItem?.assetCode || "Mặc định"}</Text> -{" "}
+              Asset Code: <Text style={{ fontWeight: "700", color: Colors.text }}>{returnItem?.assetCode || "Default"}</Text> -{" "}
               {returnItem?.allocatedEquipmentTypeName}
             </Text>
 
-            <Text style={styles.modalLabel}>Tình trạng máy sau khi dùng:</Text>
+            <Text style={styles.modalLabel}>Equipment condition after use:</Text>
             <View style={styles.conditionRow}>
               {["Good", "Fair", "Damaged"].map((c) => (
                 <TouchableOpacity
@@ -333,16 +333,16 @@ export default function EquipmentScreen() {
                   onPress={() => setReturnCondition(c)}
                 >
                   <Text style={[styles.conditionBtnText, returnCondition === c && styles.conditionBtnTextActive]}>
-                    {c === "Good" ? "Tốt" : c === "Fair" ? "Bình thường" : "Hỏng / Lỗi"}
+                    {c === "Good" ? "Good" : c === "Fair" ? "Fair" : "Damaged / Broken"}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
 
-            <Text style={styles.modalLabel}>Ghi chú kiểm tra (Tùy chọn):</Text>
+            <Text style={styles.modalLabel}>Inspection notes (Optional):</Text>
             <TextInput
               style={styles.modalInput}
-              placeholder="VD: Đã sạc đầy pin, vệ sinh sạch sau buổi đo..."
+              placeholder="e.g. Fully recharged battery, cleaned after measurements..."
               placeholderTextColor="#94a3b8"
               multiline
               numberOfLines={3}
@@ -352,11 +352,11 @@ export default function EquipmentScreen() {
 
             <View style={styles.modalActions}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setReturnItem(null)}>
-                <Text style={styles.cancelBtnText}>Hủy</Text>
+                <Text style={styles.cancelBtnText}>Cancel</Text>
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.confirmReturnBtn} onPress={handleReturnSubmit}>
-                <Text style={styles.confirmReturnBtnText}>Xác nhận trả về kho</Text>
+                <Text style={styles.confirmReturnBtnText}>Confirm Return</Text>
               </TouchableOpacity>
             </View>
           </View>

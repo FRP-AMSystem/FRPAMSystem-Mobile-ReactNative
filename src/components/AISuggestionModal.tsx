@@ -28,7 +28,7 @@ function formatFitnessScore(score?: number | null): string {
   const num = Number(score);
   if (isNaN(num)) return "--";
   const val = num > 1 ? num : num * 100;
-  return `${val.toFixed(1).replace(/\.0$/, "")}%`;
+  return `${val.toFixed(1).replace(/\.0$/, "")}`;
 }
 
 export function AISuggestionModal({
@@ -63,8 +63,8 @@ export function AISuggestionModal({
     } catch (err: any) {
       console.error("Load AI suggestions error:", err);
       Alert.alert(
-        "Tối ưu hóa bằng AI",
-        err?.message || "Không thể tạo phương án tối ưu. Vui lòng kiểm tra lại các yêu cầu tài nguyên của đề tài."
+        "AI Optimization",
+        err?.message || "Could not generate optimization plan. Please verify all resource requirements."
       );
     } finally {
       setLoading(false);
@@ -85,14 +85,14 @@ export function AISuggestionModal({
       await submitExperiment(experiment.experimentId);
 
       Alert.alert(
-        "Áp dụng thành công",
-        `Đã lưu kế hoạch phân bổ tối ưu (Ứng viên #${currentCandidate.rank}) và nộp đề tài lên Quản lý phê duyệt.`
+        "Applied Successfully",
+        `Saved optimal allocation plan (Candidate #${currentCandidate.rank}) and submitted experiment for Manager approval.`
       );
       onSuccess();
       onClose();
     } catch (err: any) {
       console.error("Apply suggestion failed:", err);
-      Alert.alert("Lỗi", "Không thể nộp đề tài. Vui lòng thử lại.");
+      Alert.alert("Error", "Failed to submit experiment. Please try again.");
     } finally {
       setApplying(false);
     }
@@ -115,7 +115,7 @@ export function AISuggestionModal({
                 <Text style={styles.aiTagText}>AI OPTIMIZATION SOLVER</Text>
               </View>
               <Text style={styles.headerTitle} numberOfLines={1}>
-                Gợi ý Phân bổ Tối ưu
+                Optimal Allocation Suggestions
               </Text>
             </View>
 
@@ -130,14 +130,14 @@ export function AISuggestionModal({
           <View style={styles.centerLoading}>
             <ActivityIndicator size="large" color="#7c3aed" />
             <Text style={styles.loadingText}>
-              Thuật toán di truyền (GA) đang giải bài toán tối ưu hóa tài nguyên từ máy chủ...
+              Genetic Algorithm (GA) solver is computing optimal resource allocations...
             </Text>
           </View>
         ) : candidates.length === 0 ? (
           <View style={styles.centerLoading}>
             <Ionicons name="alert-circle-outline" size={48} color="#94a3b8" />
             <Text style={[styles.loadingText, { textAlign: "center" }]}>
-              Chưa có phương án tối ưu nào được tạo. Đảm bảo đề tài đã có đầy đủ Phase và Yêu cầu thiết bị/nhân sự/đất.
+              No optimization candidates found. Please ensure the experiment has phases and equipment/personnel/land requirements configured.
             </Text>
           </View>
         ) : (
@@ -167,7 +167,7 @@ export function AISuggestionModal({
                         isSel && styles.candidateTabRankActive,
                       ]}
                     >
-                      {c.rank === 1 ? "★ Ứng viên #1" : `Ứng viên #${c.rank}`}
+                      {c.rank === 1 ? "★ Candidate #1" : `Candidate #${c.rank}`}
                     </Text>
                     <Text
                       style={[
@@ -190,7 +190,7 @@ export function AISuggestionModal({
                     <View style={styles.scoreBadge}>
                       <Ionicons name="trophy" size={16} color="#15803d" />
                       <Text style={styles.scoreBadgeText}>
-                        Độ tối ưu: {formatFitnessScore(currentCandidate.fitnessScore)}
+                        Fitness Score: {formatFitnessScore(currentCandidate.fitnessScore)}
                       </Text>
                     </View>
 
@@ -198,7 +198,7 @@ export function AISuggestionModal({
                       <View style={styles.conflictBadge}>
                         <Ionicons name="warning" size={13} color="#b91c1c" />
                         <Text style={styles.conflictBadgeText}>
-                          {currentCandidate.conflictCount} xung đột
+                          {currentCandidate.conflictCount} conflicts
                         </Text>
                       </View>
                     ) : (
@@ -210,14 +210,14 @@ export function AISuggestionModal({
                       >
                         <Ionicons name="checkmark-circle" size={13} color="#16a34a" />
                         <Text style={[styles.conflictBadgeText, { color: "#16a34a" }]}>
-                          Khả thi 100%
+                          100% Feasible
                         </Text>
                       </View>
                     )}
                   </View>
 
                   <Text style={styles.heroTitle}>
-                    {experiment?.experimentName || "Phương án điều phối đề tài"}
+                    {experiment?.experimentName || "Experiment Allocation Plan"}
                   </Text>
 
                   {/* Metrics grid */}
@@ -226,25 +226,25 @@ export function AISuggestionModal({
                       <Text style={styles.summaryValue}>
                         {currentCandidate.allocatedEquipment?.length || 0}
                       </Text>
-                      <Text style={styles.summaryLabel}>Thiết bị</Text>
+                      <Text style={styles.summaryLabel}>Equipment</Text>
                     </View>
                     <View style={styles.summaryItem}>
                       <Text style={styles.summaryValue}>
                         {currentCandidate.allocatedHumans?.length || 0}
                       </Text>
-                      <Text style={styles.summaryLabel}>Nhân lực</Text>
+                      <Text style={styles.summaryLabel}>Personnel</Text>
                     </View>
                     <View style={styles.summaryItem}>
                       <Text style={styles.summaryValue}>
                         {currentCandidate.allocatedLands?.length || 0}
                       </Text>
-                      <Text style={styles.summaryLabel}>Khu đất</Text>
+                      <Text style={styles.summaryLabel}>Land</Text>
                     </View>
                     <View style={styles.summaryItem}>
                       <Text style={styles.summaryValue}>
-                        {currentCandidate.estimatedDurationDays || "-"} ngày
+                        {currentCandidate.estimatedDurationDays || "-"} days
                       </Text>
-                      <Text style={styles.summaryLabel}>Thời gian</Text>
+                      <Text style={styles.summaryLabel}>Duration</Text>
                     </View>
                   </View>
                 </View>
@@ -255,7 +255,7 @@ export function AISuggestionModal({
                     <View style={styles.sectionHeader}>
                       <Ionicons name="checkmark-circle" size={18} color="#16a34a" />
                       <Text style={[styles.sectionTitle, { color: "#166534" }]}>
-                        Ưu điểm phương án
+                        Candidate Advantages
                       </Text>
                     </View>
                     {currentCandidate.advantages.map((adv, idx) => (
@@ -273,7 +273,7 @@ export function AISuggestionModal({
                     <View style={styles.sectionHeader}>
                       <Ionicons name="alert-circle" size={18} color="#dc2626" />
                       <Text style={[styles.sectionTitle, { color: "#991b1b" }]}>
-                        Lưu ý & Ràng buộc
+                        Constraints & Notices
                       </Text>
                     </View>
                     {currentCandidate.disadvantages.map((dis, idx) => (
@@ -290,15 +290,15 @@ export function AISuggestionModal({
                   <View style={styles.sectionCard}>
                     <View style={styles.sectionHeader}>
                       <Ionicons name="construct" size={18} color="#d97706" />
-                      <Text style={styles.sectionTitle}>Thiết bị được điều phối</Text>
+                      <Text style={styles.sectionTitle}>Allocated Equipment</Text>
                     </View>
                     {currentCandidate.allocatedEquipment.map((eq, idx) => (
                       <View key={idx} style={styles.resourceRowCard}>
                         <Text style={styles.resourceTitle}>
-                          {eq.equipmentTypeName || "Thiết bị chuyên dụng"}
+                          {eq.equipmentTypeName || "Specialized Equipment"}
                         </Text>
                         <Text style={styles.resourceSub}>
-                          Mã máy: {eq.assetCode || "Tự động gán"} • Hiệu suất:{" "}
+                          Asset Code: {eq.assetCode || "Auto-assigned"} • Efficiency:{" "}
                           {Math.round((eq.efficiencyRate || 1) * 100)}%
                         </Text>
                       </View>
@@ -311,15 +311,15 @@ export function AISuggestionModal({
                   <View style={styles.sectionCard}>
                     <View style={styles.sectionHeader}>
                       <Ionicons name="people" size={18} color="#9333ea" />
-                      <Text style={styles.sectionTitle}>Nhân sự được bố trí</Text>
+                      <Text style={styles.sectionTitle}>Allocated Personnel</Text>
                     </View>
                     {currentCandidate.allocatedHumans.map((hu, idx) => (
                       <View key={idx} style={styles.resourceRowCard}>
                         <Text style={styles.resourceTitle}>
-                          {hu.fullName || hu.roleName || "Cán bộ tác nghiệp"}
+                          {hu.fullName || hu.roleName || "Field Staff"}
                         </Text>
                         <Text style={styles.resourceSub}>
-                          Vai trò: {hu.roleName || "Kỹ thuật"} {hu.skillName ? `• Kỹ năng: ${hu.skillName}` : ""}
+                          Role: {hu.roleName || "Technical"} {hu.skillName ? `• Skill: ${hu.skillName}` : ""}
                         </Text>
                       </View>
                     ))}
@@ -350,7 +350,7 @@ export function AISuggestionModal({
                 <>
                   <Ionicons name="checkmark-done-circle" size={18} color="#ffffff" />
                   <Text style={styles.applyBtnText}>
-                    Áp dụng Ứng viên #{currentCandidate.rank} & Nộp duyệt
+                    Apply Candidate #{currentCandidate.rank} & Submit
                   </Text>
                 </>
               )}

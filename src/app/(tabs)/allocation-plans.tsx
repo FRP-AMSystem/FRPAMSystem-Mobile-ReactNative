@@ -15,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { getAllocationPlans } from "../../api/allocationPlanApi";
 import { AllocationPlanDetailModal } from "../../components/AllocationPlanDetailModal";
 import { Colors } from "../../constants/colors";
+import { useAuth } from "../../context/AuthContext";
 import { styles } from "../../styles/allocation-plans.styles";
 import { AllocationPlanItem, AllocationPlanStatus } from "../../types/allocationPlan";
 
@@ -35,10 +36,11 @@ function formatFitnessScore(score?: number | null): string {
   const num = Number(score);
   if (isNaN(num)) return "--";
   const val = num > 1 ? num : num * 100;
-  return `${val.toFixed(1).replace(/\.0$/, "")}%`;
+  return `${val.toFixed(1).replace(/\.0$/, "")}`;
 }
 
 export default function AllocationPlansScreen() {
+  const { isResearcher, isManager, isAdmin, user } = useAuth();
   const [plans, setPlans] = useState<AllocationPlanItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -52,16 +54,24 @@ export default function AllocationPlansScreen() {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await getAllocationPlans();
-      setPlans(data || []);
+      const params: any = {};
+      if (isResearcher && !isManager && !isAdmin && user?.userId) {
+        params.CreatedBy = user.userId;
+      }
+      const data = await getAllocationPlans(params);
+      let list = data || [];
+      if (isResearcher && !isManager && !isAdmin && user?.userId) {
+        list = list.filter((plan) => !plan.createdBy || plan.createdBy === user.userId);
+      }
+      setPlans(list);
     } catch (err: any) {
       console.error(err);
-      Alert.alert("Lỗi", "Không thể tải danh sách kế hoạch phân bổ.");
+      Alert.alert("Error", "Failed to load allocation plans.");
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [isResearcher, isManager, isAdmin, user?.userId]);
 
   useEffect(() => {
     loadData();
@@ -89,14 +99,14 @@ export default function AllocationPlansScreen() {
   const getStatusBadge = (status?: AllocationPlanStatus) => {
     switch (status) {
       case "Approved":
-        return { label: "Đã duyệt", bg: "#f0fdf4", text: "#15803d", border: "#86efac" };
+        return { label: "Approved", bg: "#f0fdf4", text: "#15803d", border: "#86efac" };
       case "Pending":
-        return { label: "Chờ duyệt", bg: "#fffbeb", text: "#b45309", border: "#fde68a" };
+        return { label: "Pending", bg: "#fffbeb", text: "#b45309", border: "#fde68a" };
       case "Rejected":
-        return { label: "Từ chối", bg: "#fef2f2", text: "#b91c1c", border: "#fca5a5" };
+        return { label: "Rejected", bg: "#fef2f2", text: "#b91c1c", border: "#fca5a5" };
       case "Draft":
       default:
-        return { label: "Bản nháp", bg: "#f1f5f9", text: "#475569", border: "#cbd5e1" };
+        return { label: "Draft", bg: "#f1f5f9", text: "#475569", border: "#cbd5e1" };
     }
   };
 
@@ -105,8 +115,8 @@ export default function AllocationPlansScreen() {
       {/* Top Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>Kế hoạch Phân bổ</Text>
-          <Text style={styles.headerSubtitle}>Tối ưu hóa máy móc, nhân sự và quỹ đất</Text>
+          <Text style={styles.headerTitle}>Allocation Plans</Text>
+          <Text style={styles.headerSubtitle}>Optimize equipment, personnel, and land plots</Text>
         </View>
       </View>
 
@@ -115,7 +125,7 @@ export default function AllocationPlansScreen() {
         <Ionicons name="search-outline" size={18} color={Colors.textMuted} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Tìm theo tên đề tài..."
+          placeholder="Search by experiment name..."
           placeholderTextColor="#94a3b8"
           value={searchTerm}
           onChangeText={setSearchTerm}
@@ -135,11 +145,11 @@ export default function AllocationPlansScreen() {
         contentContainerStyle={styles.tabFilterRow}
       >
         {[
-          { key: "all", label: "Tất cả" },
-          { key: "Approved", label: "Đã duyệt" },
-          { key: "Pending", label: "Chờ duyệt" },
-          { key: "Draft", label: "Bản nháp" },
-          { key: "Rejected", label: "Từ chối" },
+          { key: "all", label: "All" },
+          { key: "Approved", label: "Approved" },
+          { key: "Pending", label: "Pending" },
+          { key: "Draft", label: "Draft" },
+          { key: "Rejected", label: "Rejected" },
         ].map((t) => (
           <TouchableOpacity
             key={t.key}
@@ -157,15 +167,15 @@ export default function AllocationPlansScreen() {
       {loading ? (
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={styles.loadingText}>Đang tải danh sách kế hoạch...</Text>
+          <Text style={styles.loadingText}>Loading allocation plans...</Text>
         </View>
       ) : filteredPlans.length === 0 ? (
         <View style={styles.centerContainer}>
           <View style={styles.emptyIconBox}>
             <Ionicons name="git-network-outline" size={36} color={Colors.textMuted} />
           </View>
-          <Text style={styles.emptyTitle}>Chưa có kế hoạch phân bổ nào</Text>
-          <Text style={styles.emptyText}>Các phương án phân bổ tài nguyên sau khi tạo sẽ hiển thị tại đây.</Text>
+          <Text style={styles.emptyTitle}>No allocation plans found</Text>
+          <Text style={styles.emptyText}>Resource allocation plans will appear here once generated.</Text>
         </View>
       ) : (
         <FlatList
@@ -187,7 +197,7 @@ export default function AllocationPlansScreen() {
               >
                 <View style={styles.cardHeader}>
                   <Text style={styles.planExpName} numberOfLines={2}>
-                    {item.experimentName || "Kế hoạch Phân bổ Tài nguyên"}
+                    {item.experimentName || "Resource Allocation Plan"}
                   </Text>
                   <View style={[styles.badge, { backgroundColor: badge.bg, borderColor: badge.border }]}>
                     <Text style={[styles.badgeText, { color: badge.text }]}>{badge.label}</Text>
@@ -198,7 +208,7 @@ export default function AllocationPlansScreen() {
                   <View style={styles.scoreRow}>
                     <Ionicons name="sparkles" size={14} color="#6366f1" />
                     <Text style={styles.scoreText}>
-                      Độ tối ưu: {formatFitnessScore(item.fitnessScore)}
+                      Fitness Score: {formatFitnessScore(item.fitnessScore)}
                     </Text>
                   </View>
                 ) : null}
@@ -208,28 +218,28 @@ export default function AllocationPlansScreen() {
                   <View style={styles.statItem}>
                     <Ionicons name="construct-outline" size={16} color="#d97706" />
                     <Text style={styles.statValue}>{item.equipmentDetailCount ?? "-"}</Text>
-                    <Text style={styles.statLabel}>Thiết bị</Text>
+                    <Text style={styles.statLabel}>Equipment</Text>
                   </View>
                   <View style={styles.statDivider} />
                   <View style={styles.statItem}>
                     <Ionicons name="people-outline" size={16} color="#9333ea" />
                     <Text style={styles.statValue}>{item.humanDetailCount ?? "-"}</Text>
-                    <Text style={styles.statLabel}>Nhân lực</Text>
+                    <Text style={styles.statLabel}>Personnel</Text>
                   </View>
                   <View style={styles.statDivider} />
                   <View style={styles.statItem}>
                     <Ionicons name="leaf-outline" size={16} color="#16a34a" />
                     <Text style={styles.statValue}>{item.landDetailCount ?? "-"}</Text>
-                    <Text style={styles.statLabel}>Khu đất</Text>
+                    <Text style={styles.statLabel}>Land</Text>
                   </View>
                 </View>
 
                 <View style={styles.cardFooter}>
                   <Text style={styles.footerDate}>
-                    Ngày tạo: {formatDate(item.createdAt)}
+                    Created: {formatDate(item.createdAt)}
                   </Text>
                   <View style={styles.detailLink}>
-                    <Text style={styles.detailLinkText}>Xem chi tiết</Text>
+                    <Text style={styles.detailLinkText}>View Details</Text>
                     <Ionicons name="chevron-forward" size={13} color={Colors.primary} />
                   </View>
                 </View>
@@ -244,6 +254,7 @@ export default function AllocationPlansScreen() {
         visible={detailModalVisible}
         plan={selectedPlan}
         onClose={() => setDetailModalVisible(false)}
+        onSuccess={loadData}
       />
     </SafeAreaView>
   );

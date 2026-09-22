@@ -20,7 +20,7 @@ export async function getEquipments(params?: {
     return rawList.map((m: any) => ({
       equipmentId: Number(m.equipmentId ?? m.id ?? 0),
       equipmentCode: m.equipmentCode || m.code || `EQ-${m.equipmentId || m.id}`,
-      equipmentName: m.equipmentName || m.name || "Thiết bị",
+      equipmentName: m.equipmentName || m.name || "Equipment",
       typeName: m.typeName || m.equipmentTypeName || m.equipmentType?.name || undefined,
       typeId: m.typeId || m.equipmentTypeId || m.equipmentType?.equipmentTypeId || undefined,
       status: m.status || "Available",
@@ -34,7 +34,7 @@ export async function getEquipments(params?: {
     return mine.map((m) => ({
       equipmentId: m.allocationEquipmentDetailId,
       equipmentCode: m.assetCode || `EQ-${m.allocationEquipmentDetailId}`,
-      equipmentName: m.allocatedEquipmentTypeName || "Thiết bị",
+      equipmentName: m.allocatedEquipmentTypeName || "Equipment",
       typeName: m.allocatedEquipmentTypeName || undefined,
       typeId: m.allocatedEquipmentTypeId || undefined,
       status: m.status,
@@ -50,7 +50,7 @@ export async function getEquipmentById(id: number): Promise<EquipmentItem> {
   return {
     equipmentId: Number(m.equipmentId ?? m.id ?? 0),
     equipmentCode: m.equipmentCode || `EQ-${m.equipmentId || m.id}`,
-    equipmentName: m.equipmentName || m.name || "Thiết bị",
+    equipmentName: m.equipmentName || m.name || "Equipment",
     typeName: m.typeName || m.equipmentTypeName || undefined,
     typeId: m.typeId || m.equipmentTypeId || undefined,
     status: m.status || "Available",

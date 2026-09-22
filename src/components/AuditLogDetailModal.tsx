@@ -31,12 +31,12 @@ export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({
     switch ((sev || "").toLowerCase()) {
       case "error":
       case "critical":
-        return { bg: "#fee2e2", text: "#b91c1c", label: "Lỗi nghiêm trọng" };
+        return { bg: "#fee2e2", text: "#b91c1c", label: "Error" };
       case "warning":
-        return { bg: "#fef3c7", text: "#d97706", label: "Cảnh báo" };
+        return { bg: "#fef3c7", text: "#d97706", label: "Warning" };
       case "info":
       default:
-        return { bg: "#e0f2fe", text: "#0284c7", label: "Thông tin" };
+        return { bg: "#e0f2fe", text: "#0284c7", label: "Info" };
     }
   };
 
@@ -53,8 +53,8 @@ export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({
   };
 
   const formattedTimestamp = log.timestamp || log.createdAt
-    ? new Date(log.timestamp || log.createdAt || "").toLocaleString("vi-VN")
-    : "Không xác định";
+    ? new Date(log.timestamp || log.createdAt || "").toLocaleString("en-US")
+    : "Unknown";
 
   return (
     <Modal
@@ -82,8 +82,8 @@ export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({
               <Ionicons name="shield-checkmark" size={22} color="#16a34a" />
             </View>
             <View style={styles.headerTextWrap}>
-              <Text style={styles.title}>Chi tiết Nhật ký Hệ thống</Text>
-              <Text style={styles.subtitle}>{log.action || "Hoạt động ghi nhận"}</Text>
+              <Text style={styles.title}>System Audit Log Details</Text>
+              <Text style={styles.subtitle}>{log.action || "Recorded Activity"}</Text>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
               <Ionicons name="close" size={22} color="#64748b" />
@@ -97,7 +97,7 @@ export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({
             {/* Meta Grid */}
             <View style={styles.metaGrid}>
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Mức độ cảnh báo</Text>
+                <Text style={styles.metaLabel}>Severity</Text>
                 <View
                   style={[
                     styles.severityBadge,
@@ -111,66 +111,66 @@ export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({
               </View>
 
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Phân hệ (Module)</Text>
-                <Text style={styles.metaValue}>{log.module || "Hệ thống chung"}</Text>
+                <Text style={styles.metaLabel}>Module</Text>
+                <Text style={styles.metaValue}>{log.module || "General System"}</Text>
               </View>
 
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Hành động</Text>
-                <Text style={styles.metaValue}>{log.action || "Thao tác"}</Text>
+                <Text style={styles.metaLabel}>Action</Text>
+                <Text style={styles.metaValue}>{log.action || "Operation"}</Text>
               </View>
 
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Người thực hiện</Text>
+                <Text style={styles.metaLabel}>Actor</Text>
                 <Text style={styles.metaValue}>
-                  {log.userFullName || log.username || "Hệ thống tự động"}
+                  {log.userFullName || log.username || "Automated System"}
                 </Text>
               </View>
 
               {log.roleName ? (
                 <View style={styles.metaRow}>
-                  <Text style={styles.metaLabel}>Vai trò</Text>
+                  <Text style={styles.metaLabel}>Role</Text>
                   <Text style={styles.metaValue}>{log.roleName}</Text>
                 </View>
               ) : null}
 
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Thời gian ghi nhận</Text>
+                <Text style={styles.metaLabel}>Timestamp</Text>
                 <Text style={styles.metaValue}>{formattedTimestamp}</Text>
               </View>
 
               {log.ipAddress ? (
                 <View style={styles.metaRow}>
-                  <Text style={styles.metaLabel}>Địa chỉ IP</Text>
+                  <Text style={styles.metaLabel}>IP Address</Text>
                   <Text style={styles.metaValue}>{log.ipAddress}</Text>
                 </View>
               ) : null}
             </View>
 
-            {/* Chi tiết nội dung */}
+            {/* Details */}
             {log.details ? (
               <>
-                <Text style={styles.sectionTitle}>Nội dung mô tả</Text>
+                <Text style={styles.sectionTitle}>Description & Details</Text>
                 <View style={styles.detailsBox}>
                   <Text style={styles.detailsText}>{log.details}</Text>
                 </View>
               </>
             ) : null}
 
-            {/* Dữ liệu thay đổi mới (New Values) */}
+            {/* New Values */}
             {log.newValues ? (
               <>
-                <Text style={styles.sectionTitle}>Dữ liệu cập nhật (Payload)</Text>
+                <Text style={styles.sectionTitle}>Updated Data (Payload)</Text>
                 <View style={styles.codeBlock}>
                   <Text style={styles.codeText}>{formatJson(log.newValues)}</Text>
                 </View>
               </>
             ) : null}
 
-            {/* Dữ liệu cũ (Old Values) */}
+            {/* Old Values */}
             {log.oldValues ? (
               <>
-                <Text style={styles.sectionTitle}>Dữ liệu trước đó</Text>
+                <Text style={styles.sectionTitle}>Previous Data (Old Values)</Text>
                 <View style={styles.codeBlock}>
                   <Text style={styles.codeText}>{formatJson(log.oldValues)}</Text>
                 </View>
@@ -182,7 +182,7 @@ export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({
               onPress={onClose}
               activeOpacity={0.8}
             >
-              <Text style={styles.closeActionText}>Đóng</Text>
+              <Text style={styles.closeActionText}>Close</Text>
             </TouchableOpacity>
           </ScrollView>
         </View>

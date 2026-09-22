@@ -91,6 +91,7 @@ async function enrichAllocationPlans(plans: AllocationPlanItem[]): Promise<Alloc
 
 export async function getAllocationPlans(params?: {
   ExperimentId?: number;
+  CreatedBy?: number;
   ApproveStatus?: string;
   Size?: number;
 }): Promise<AllocationPlanItem[]> {

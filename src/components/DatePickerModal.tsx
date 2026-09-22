@@ -20,21 +20,21 @@ interface DatePickerModalProps {
 }
 
 const MONTH_NAMES = [
-  "Tháng 1",
-  "Tháng 2",
-  "Tháng 3",
-  "Tháng 4",
-  "Tháng 5",
-  "Tháng 6",
-  "Tháng 7",
-  "Tháng 8",
-  "Tháng 9",
-  "Tháng 10",
-  "Tháng 11",
-  "Tháng 12",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
-const WEEK_DAYS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+const WEEK_DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
 function formatToYMD(d: Date): string {
   const y = d.getFullYear();
@@ -46,7 +46,7 @@ function formatToYMD(d: Date): string {
 export function DatePickerModal({
   visible,
   value,
-  title = "Chọn ngày",
+  title = "Select Date",
   minDate,
   maxDate,
   onClose,
@@ -221,35 +221,35 @@ export function DatePickerModal({
                   style={styles.presetPill}
                   onPress={() => handleApplyPreset(0)}
                 >
-                  <Text style={styles.presetText}>Hôm nay</Text>
+                  <Text style={styles.presetText}>Today</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.presetPill}
                   onPress={() => handleApplyPreset(7)}
                 >
-                  <Text style={styles.presetText}>+7 ngày</Text>
+                  <Text style={styles.presetText}>+7 days</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.presetPill}
                   onPress={() => handleApplyPreset(30)}
                 >
-                  <Text style={styles.presetText}>+1 tháng</Text>
+                  <Text style={styles.presetText}>+1 month</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.presetPill}
                   onPress={() => handleApplyPreset(90)}
                 >
-                  <Text style={styles.presetText}>+3 tháng</Text>
+                  <Text style={styles.presetText}>+3 months</Text>
                 </TouchableOpacity>
               </View>
 
               {/* Actions */}
               <View style={styles.footerActions}>
                 <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
-                  <Text style={styles.cancelBtnText}>Hủy</Text>
+                  <Text style={styles.cancelBtnText}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm}>
-                  <Text style={styles.confirmBtnText}>Xác nhận</Text>
+                  <Text style={styles.confirmBtnText}>Confirm</Text>
                 </TouchableOpacity>
               </View>
             </View>

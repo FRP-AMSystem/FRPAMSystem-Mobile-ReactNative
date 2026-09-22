@@ -28,10 +28,12 @@ export interface ExperimentItem {
 export interface CreateExperimentRequest {
   experimentName: string;
   description?: string | null;
+  researcherId?: number;
   expectStartDate: string;
   expectEndDate: string;
   deadline: string;
   priority?: string | number;
+  status?: ExperimentStatus | string;
 }
 
 export interface ExperimentPhaseItem {

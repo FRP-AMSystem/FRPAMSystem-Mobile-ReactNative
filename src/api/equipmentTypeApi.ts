@@ -18,8 +18,8 @@ export async function getEquipmentTypes(): Promise<EquipmentTypeItem[]> {
     equipmentTypeId: Number(item.equipmentTypeId || item.id || 0),
     equipmentCategoryId: Number(item.equipmentCategoryId || 0),
     equipmentCategoryName: item.equipmentCategoryName || "",
-    name: item.name || item.equipmentTypeName || `Thiết bị #${item.equipmentTypeId}`,
-    equipmentTypeName: item.name || item.equipmentTypeName || `Thiết bị #${item.equipmentTypeId}`,
+    name: item.name || item.equipmentTypeName || `Equipment #${item.equipmentTypeId}`,
+    equipmentTypeName: item.name || item.equipmentTypeName || `Equipment #${item.equipmentTypeId}`,
     totalQuantity: Number(item.totalQuantity || 0),
   }));
 }

@@ -19,6 +19,8 @@ export interface UserData {
   email: string;
   roleName: Role;
   avatar?: string;
+  phoneNumber?: string;
+  department?: string;
 }
 
 export interface LoginResponse {

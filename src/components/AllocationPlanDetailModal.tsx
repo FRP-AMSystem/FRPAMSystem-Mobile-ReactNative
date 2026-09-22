@@ -41,7 +41,7 @@ function formatFitnessScore(score?: number | null): string {
   const num = Number(score);
   if (isNaN(num)) return "--";
   const val = num > 1 ? num : num * 100;
-  return `${val.toFixed(1).replace(/\.0$/, "")}%`;
+  return `${val.toFixed(1).replace(/\.0$/, "")}`;
 }
 
 export function AllocationPlanDetailModal({
@@ -72,22 +72,22 @@ export function AllocationPlanDetailModal({
   const handleApprove = () => {
     if (!plan) return;
     Alert.alert(
-      "Phê duyệt phân bổ",
-      `Bạn có chắc chắn muốn phê duyệt kế hoạch phân bổ tài nguyên cho đề tài "${plan.experimentName || ""}" không?`,
+      "Approve Allocation Plan",
+      `Are you sure you want to approve the resource allocation plan for "${plan.experimentName || ""}"?`,
       [
-        { text: "Hủy", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         {
-          text: "Phê duyệt",
+          text: "Approve",
           onPress: async () => {
             try {
               setActionLoading(true);
               await approveAllocationPlan(plan.allocationPlanId);
-              Alert.alert("Thành công", "Kế hoạch phân bổ đã được phê duyệt chính thức!");
+              Alert.alert("Success", "Allocation plan has been approved!");
               onSuccess?.();
               onClose();
             } catch (err: any) {
               console.error(err);
-              Alert.alert("Lỗi", "Không thể phê duyệt kế hoạch phân bổ.");
+              Alert.alert("Error", "Failed to approve allocation plan.");
             } finally {
               setActionLoading(false);
             }
@@ -103,12 +103,12 @@ export function AllocationPlanDetailModal({
       setActionLoading(true);
       await rejectAllocationPlan(plan.allocationPlanId, reason);
       setRejectModalVisible(false);
-      Alert.alert("Thành công", "Đã từ chối kế hoạch phân bổ và gửi phản hồi.");
+      Alert.alert("Success", "Allocation plan rejected and feedback sent.");
       onSuccess?.();
       onClose();
     } catch (err: any) {
       console.error(err);
-      Alert.alert("Lỗi", "Không thể từ chối kế hoạch phân bổ.");
+      Alert.alert("Error", "Failed to reject allocation plan.");
     } finally {
       setActionLoading(false);
     }
@@ -138,7 +138,7 @@ export function AllocationPlanDetailModal({
     switch (status) {
       case "Approved":
         return {
-          label: "Đã phê duyệt",
+          label: "Approved",
           bg: "#f0fdf4",
           text: "#15803d",
           border: "#86efac",
@@ -146,7 +146,7 @@ export function AllocationPlanDetailModal({
         };
       case "Pending":
         return {
-          label: "Chờ thẩm định",
+          label: "Pending",
           bg: "#fffbeb",
           text: "#b45309",
           border: "#fde68a",
@@ -154,7 +154,7 @@ export function AllocationPlanDetailModal({
         };
       case "Rejected":
         return {
-          label: "Bị từ chối",
+          label: "Rejected",
           bg: "#fef2f2",
           text: "#b91c1c",
           border: "#fca5a5",
@@ -163,7 +163,7 @@ export function AllocationPlanDetailModal({
       case "Draft":
       default:
         return {
-          label: "Bản nháp",
+          label: "Draft",
           bg: "#f1f5f9",
           text: "#475569",
           border: "#cbd5e1",
@@ -185,10 +185,10 @@ export function AllocationPlanDetailModal({
               <View style={styles.headerTitleGroup}>
                 <View style={styles.categoryPill}>
                   <Ionicons name="git-network" size={13} color="#7e22ce" />
-                  <Text style={styles.categoryPillText}>ĐIỀU PHỐI TÀI NGUYÊN</Text>
+                  <Text style={styles.categoryPillText}>RESOURCE ALLOCATION</Text>
                 </View>
                 <Text style={styles.modalTitle} numberOfLines={1}>
-                  Chi tiết Kế hoạch Phân bổ
+                  Allocation Plan Details
                 </Text>
               </View>
 
@@ -202,12 +202,12 @@ export function AllocationPlanDetailModal({
           {loading ? (
             <View style={styles.centerLoading}>
               <ActivityIndicator size="large" color={Colors.primary} />
-              <Text style={styles.loadingText}>Đang tải kế hoạch phân bổ...</Text>
+              <Text style={styles.loadingText}>Loading allocation plan...</Text>
             </View>
           ) : !plan ? (
             <View style={styles.centerLoading}>
               <Ionicons name="alert-circle-outline" size={48} color={Colors.textMuted} />
-              <Text style={styles.emptyText}>Không tìm thấy kế hoạch phân bổ này.</Text>
+              <Text style={styles.emptyText}>Allocation plan not found.</Text>
             </View>
           ) : (
             <ScrollView
@@ -238,122 +238,122 @@ export function AllocationPlanDetailModal({
                   {plan.fitnessScore != null ? (
                     <View style={styles.fitnessPill}>
                       <Text style={styles.fitnessText}>
-                        Độ tối ưu: {formatFitnessScore(plan.fitnessScore)}
+                        Fitness Score: {formatFitnessScore(plan.fitnessScore)}
                       </Text>
                     </View>
                   ) : null}
                 </View>
 
                 <Text style={styles.planTitle}>
-                  {plan.experimentName || "Kế hoạch Phân bổ Tài nguyên Đề tài"}
+                  {plan.experimentName || "Experiment Resource Allocation Plan"}
                 </Text>
               </View>
 
-              {/* 2. Thiết bị phân bổ (Equipment) */}
+              {/* 2. Equipment */}
               <View style={styles.sectionCard}>
                 <View style={styles.sectionHeader}>
                   <View style={styles.sectionHeaderLeft}>
                     <View style={[styles.sectionIconBox, { backgroundColor: "#fffbeb" }]}>
                       <Ionicons name="construct" size={16} color="#d97706" />
                     </View>
-                    <Text style={styles.sectionTitle}>Thiết bị Máy móc</Text>
+                    <Text style={styles.sectionTitle}>Allocated Equipment</Text>
                   </View>
                   <View style={styles.itemCountBadge}>
-                    <Text style={styles.itemCountText}>{equipment.length} máy</Text>
+                    <Text style={styles.itemCountText}>{equipment.length} units</Text>
                   </View>
                 </View>
 
                 {loadingDetails ? (
                   <ActivityIndicator size="small" color={Colors.primary} />
                 ) : equipment.length === 0 ? (
-                  <Text style={styles.emptyText}>Chưa có thiết bị nào trong kế hoạch này.</Text>
+                  <Text style={styles.emptyText}>No equipment allocated in this plan.</Text>
                 ) : (
                   equipment.map((eq, idx) => (
                     <View key={eq.allocationEquipmentDetailId || idx} style={styles.detailRowCard}>
                       <View style={styles.detailRowHeader}>
                         <Text style={styles.detailRowTitle}>
-                          {eq.allocatedEquipmentTypeName || "Thiết bị chuyên dụng"}
+                          {eq.allocatedEquipmentTypeName || "Specialized Equipment"}
                         </Text>
                         <View style={styles.statusSubBadge}>
-                          <Text style={styles.statusSubText}>{eq.status || "Đã phân bổ"}</Text>
+                          <Text style={styles.statusSubText}>{eq.status || "Allocated"}</Text>
                         </View>
                       </View>
                       {eq.assetCode ? (
-                        <Text style={styles.detailRowSub}>Mã máy: {eq.assetCode}</Text>
+                        <Text style={styles.detailRowSub}>Asset Code: {eq.assetCode}</Text>
                       ) : null}
                     </View>
                   ))
                 )}
               </View>
 
-              {/* 3. Nhân sự điều phối (Personnel) */}
+              {/* 3. Personnel */}
               <View style={styles.sectionCard}>
                 <View style={styles.sectionHeader}>
                   <View style={styles.sectionHeaderLeft}>
                     <View style={[styles.sectionIconBox, { backgroundColor: "#faf5ff" }]}>
                       <Ionicons name="people" size={16} color="#9333ea" />
                     </View>
-                    <Text style={styles.sectionTitle}>Nhân sự Thực hiện</Text>
+                    <Text style={styles.sectionTitle}>Allocated Personnel</Text>
                   </View>
                   <View style={styles.itemCountBadge}>
-                    <Text style={styles.itemCountText}>{human.length} nhân sự</Text>
+                    <Text style={styles.itemCountText}>{human.length} staff</Text>
                   </View>
                 </View>
 
                 {loadingDetails ? (
                   <ActivityIndicator size="small" color={Colors.primary} />
                 ) : human.length === 0 ? (
-                  <Text style={styles.emptyText}>Chưa có nhân sự nào trong kế hoạch này.</Text>
+                  <Text style={styles.emptyText}>No personnel allocated in this plan.</Text>
                 ) : (
                   human.map((hu, idx) => (
                     <View key={hu.allocationHumanDetailId || idx} style={styles.detailRowCard}>
                       <View style={styles.detailRowHeader}>
                         <Text style={styles.detailRowTitle}>
-                          {hu.humanResourceName || "Cán bộ tác nghiệp"}
+                          {hu.humanResourceName || "Field Staff"}
                         </Text>
                         <View style={styles.statusSubBadge}>
-                          <Text style={styles.statusSubText}>{hu.status || "Sẵn sàng"}</Text>
+                          <Text style={styles.statusSubText}>{hu.status || "Ready"}</Text>
                         </View>
                       </View>
                       {hu.workingHours ? (
-                        <Text style={styles.detailRowSub}>Khối lượng: {hu.workingHours} giờ công</Text>
+                        <Text style={styles.detailRowSub}>Workload: {hu.workingHours} work hours</Text>
                       ) : null}
                     </View>
                   ))
                 )}
               </View>
 
-              {/* 4. Quỹ đất lâm nghiệp (Land) */}
+              {/* 4. Land */}
               <View style={styles.sectionCard}>
                 <View style={styles.sectionHeader}>
                   <View style={styles.sectionHeaderLeft}>
                     <View style={[styles.sectionIconBox, { backgroundColor: "#f0fdf4" }]}>
                       <Ionicons name="leaf" size={16} color="#16a34a" />
                     </View>
-                    <Text style={styles.sectionTitle}>Khu đất Thử nghiệm</Text>
+                    <Text style={styles.sectionTitle}>Allocated Land Plots</Text>
                   </View>
                   <View style={styles.itemCountBadge}>
-                    <Text style={styles.itemCountText}>{land.length} khu đất</Text>
+                    <Text style={styles.itemCountText}>{land.length} plots</Text>
                   </View>
                 </View>
 
                 {loadingDetails ? (
                   <ActivityIndicator size="small" color={Colors.primary} />
                 ) : land.length === 0 ? (
-                  <Text style={styles.emptyText}>Chưa có khu đất nào trong kế hoạch này.</Text>
+                  <Text style={styles.emptyText}>No land plots allocated in this plan.</Text>
                 ) : (
                   land.map((ld, idx) => (
                     <View key={ld.allocationLandDetailId || idx} style={styles.detailRowCard}>
                       <View style={styles.detailRowHeader}>
                         <Text style={styles.detailRowTitle}>
-                          {ld.landName || "Lô đất lâm nghiệp"}
+                          {ld.landName || "Forestry Plot"}
                         </Text>
                         <View style={styles.statusSubBadge}>
-                          <Text style={styles.statusSubText}>{ld.status || "Đã phân bổ"}</Text>
+                          <Text style={styles.statusSubText}>{ld.status || "Allocated"}</Text>
                         </View>
                       </View>
                       {ld.areaName ? (
-                        <Text style={styles.detailRowSub}>Khu vực: {ld.areaName}</Text>
+                        <Text style={styles.detailRowSub}>Area: {ld.areaName}</Text>
                       ) : null}
                     </View>
                   ))
@@ -374,7 +374,7 @@ export function AllocationPlanDetailModal({
                   activeOpacity={0.8}
                 >
                   <Ionicons name="checkmark-circle" size={18} color="#ffffff" />
-                  <Text style={styles.approveBtnText}>Phê duyệt Phân bổ</Text>
+                  <Text style={styles.approveBtnText}>Approve Allocation</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -384,13 +384,13 @@ export function AllocationPlanDetailModal({
                   activeOpacity={0.8}
                 >
                   <Ionicons name="close-circle" size={18} color="#ffffff" />
-                  <Text style={styles.rejectBtnText}>Từ chối</Text>
+                  <Text style={styles.rejectBtnText}>Reject</Text>
                 </TouchableOpacity>
               </View>
             )}
 
             <TouchableOpacity style={styles.closeActionBtn} onPress={onClose} activeOpacity={0.8}>
-              <Text style={styles.closeActionText}>Đóng</Text>
+              <Text style={styles.closeActionText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -398,9 +398,9 @@ export function AllocationPlanDetailModal({
         {/* Reject Reason Modal */}
         <RejectReasonModal
           visible={rejectModalVisible}
-          title="Từ chối Kế hoạch Phân bổ"
+          title="Reject Allocation Plan"
           itemTitle={plan?.experimentName || undefined}
-          itemType="kế hoạch phân bổ"
+          itemType="allocation plan"
           loading={actionLoading}
           onClose={() => setRejectModalVisible(false)}
           onConfirm={handleRejectConfirm}

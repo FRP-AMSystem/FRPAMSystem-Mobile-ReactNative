@@ -84,13 +84,13 @@ export default function AdminUsersScreen() {
       setCreating(true);
       await createUser(payload);
       setCreateModalVisible(false);
-      Alert.alert("Thành công", `Đã tạo tài khoản "${payload.username}" thành công!`);
+      Alert.alert("Success", `User account "${payload.username}" created successfully!`);
       loadUsers();
     } catch (err: any) {
       console.error("Create user error:", err);
       Alert.alert(
-        "Lỗi",
-        err?.response?.data?.message || "Không thể tạo tài khoản. Vui lòng kiểm tra lại dữ liệu."
+        "Error",
+        err?.response?.data?.message || "Failed to create user. Please check your input data."
       );
     } finally {
       setCreating(false);
@@ -99,21 +99,21 @@ export default function AdminUsersScreen() {
 
   const handleDeleteUser = (u: UserItem) => {
     Alert.alert(
-      "Xác nhận xóa tài khoản",
-      `Bạn có chắc chắn muốn xóa tài khoản "${u.fullName || u.username}" (@${u.username}) không? Hành động này không thể hoàn tác.`,
+      "Confirm Delete Account",
+      `Are you sure you want to delete the account "${u.fullName || u.username}" (@${u.username})? This action cannot be undone.`,
       [
-        { text: "Hủy", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         {
-          text: "Xóa tài khoản",
+          text: "Delete Account",
           style: "destructive",
           onPress: async () => {
             try {
               await deleteUser(u.userId);
-              Alert.alert("Thành công", `Đã xóa tài khoản "${u.username}" thành công!`);
+              Alert.alert("Success", `User account "${u.username}" deleted successfully!`);
               loadUsers();
             } catch (err: any) {
               console.error("Delete user error:", err);
-              Alert.alert("Lỗi", "Không thể xóa tài khoản. Vui lòng thử lại.");
+              Alert.alert("Error", "Failed to delete user account. Please try again.");
             }
           },
         },
@@ -169,7 +169,7 @@ export default function AdminUsersScreen() {
           <View style={styles.headerTitles}>
             <Text style={styles.title}>User List</Text>
             <Text style={styles.subtitle}>
-              {users.length} profiles trong hệ thống
+              {users.length} profiles in the system
             </Text>
           </View>
 
@@ -179,7 +179,7 @@ export default function AdminUsersScreen() {
             activeOpacity={0.85}
           >
             <Ionicons name="person-add" size={16} color="#ffffff" />
-            <Text style={styles.createBtnText}>Thêm mới</Text>
+            <Text style={styles.createBtnText}>+ Add User</Text>
           </TouchableOpacity>
         </View>
 
@@ -230,7 +230,7 @@ export default function AdminUsersScreen() {
       {loading ? (
         <View style={styles.centerLoading}>
           <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={styles.loadingText}>Đang tải danh sách người dùng...</Text>
+          <Text style={styles.loadingText}>Loading user list...</Text>
         </View>
       ) : (
         <FlatList
@@ -248,7 +248,7 @@ export default function AdminUsersScreen() {
           ListEmptyComponent={
             <View style={styles.emptyWrap}>
               <Ionicons name="people-outline" size={48} color="#cbd5e1" />
-              <Text style={styles.emptyText}>Không tìm thấy tài khoản người dùng phù hợp.</Text>
+              <Text style={styles.emptyText}>No matching user accounts found.</Text>
             </View>
           }
           renderItem={({ item }) => {

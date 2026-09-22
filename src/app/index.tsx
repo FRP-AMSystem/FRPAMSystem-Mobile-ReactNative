@@ -30,7 +30,7 @@ export default function Index() {
   return (
     <View style={styles.container}>
       <ActivityIndicator size="large" color={Colors.primary} />
-      <Text style={styles.text}>Khởi động hệ thống FRPAM...</Text>
+      <Text style={styles.text}>Starting FRPAM System...</Text>
     </View>
   );
 }

@@ -1,22 +1,22 @@
 export const Colors = {
-  primary: "#16a34a",         // Forest Green (đồng bộ FE)
+  primary: "#16a34a",         // Forest Green (sync with FE)
   primaryDark: "#15803d",     // Darker green hover
   primaryLight: "#f0fdf4",    // Light emerald tint
   primaryBorder: "rgba(22, 163, 74, 0.25)",
 
   accent: "#22c55e",
-  background: "#f8fafc",      // Slate 50 (đồng bộ FE --bg)
+  background: "#f8fafc",      // Slate 50 (sync with FE --bg)
   surface: "#ffffff",         // Card bg
   surfaceElevated: "#ffffff",
 
-  text: "#0f172a",            // Slate 900 (đồng bộ FE --text-h)
-  textSecondary: "#475569",   // Slate 600 (đồng bộ FE --text)
+  text: "#0f172a",            // Slate 900 (sync with FE --text-h)
+  textSecondary: "#475569",   // Slate 600 (sync with FE --text)
   textMuted: "#94a3b8",       // Slate 400
 
-  border: "#e2e8f0",          // Slate 200 (đồng bộ FE --border)
+  border: "#e2e8f0",          // Slate 200 (sync with FE --border)
   borderLight: "#f1f5f9",
 
-  // Status Badges (đồng bộ FE badges)
+  // Status Badges (sync with FE badges)
   status: {
     inUse: {
       bg: "#dcfce7",
@@ -45,3 +45,4 @@ export const Colors = {
     },
   },
 };
+

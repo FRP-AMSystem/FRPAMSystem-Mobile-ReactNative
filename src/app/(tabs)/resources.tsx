@@ -95,8 +95,8 @@ export default function ResourcesScreen() {
           if (!areaMap.has(aid)) {
             areaMap.set(aid, {
               areaId: aid,
-              areaName: l.areaName || `Phân khu #${aid}`,
-              description: l.soilType ? `Khu vực đất ${l.soilType}` : "Khu vực khảo nghiệm",
+              areaName: l.areaName || `Area #${aid}`,
+              description: l.soilType ? `${l.soilType} Area` : "Research Area",
               soilType: l.soilType,
             });
           }
@@ -133,23 +133,23 @@ export default function ResourcesScreen() {
 
   const handleDeletePersonnel = (item: HumanResourceProfile) => {
     Alert.alert(
-      "Xác nhận xóa",
-      `Bạn có chắc chắn muốn xóa hồ sơ nhân sự "${item.fullName || item.email || "này"}" khỏi hệ thống?`,
+      "Confirm Delete",
+      `Are you sure you want to delete the personnel profile "${item.fullName || item.email || "this person"}" from the system?`,
       [
-        { text: "Hủy", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         {
-          text: "Xóa",
+          text: "Delete",
           style: "destructive",
           onPress: async () => {
             try {
               await deleteHumanResourceProfile(item.humanResourceId);
-              Alert.alert("Thành công", "Đã xóa hồ sơ nhân sự thành công!");
+              Alert.alert("Success", "Personnel profile deleted successfully!");
               loadResources();
             } catch (err: any) {
               console.error("Delete personnel error:", err);
               Alert.alert(
-                "Lỗi",
-                err?.response?.data?.message || "Không thể xóa hồ sơ nhân sự. Vui lòng thử lại."
+                "Error",
+                err?.response?.data?.message || "Failed to delete personnel profile. Please try again."
               );
             }
           },
@@ -171,23 +171,23 @@ export default function ResourcesScreen() {
 
   const handleDeleteLand = (item: LandItem) => {
     Alert.alert(
-      "Xác nhận xóa lô đất",
-      `Bạn có chắc chắn muốn xóa lô đất "${item.landCode || item.landName}" khỏi hệ thống?`,
+      "Confirm Delete Land Plot",
+      `Are you sure you want to delete land plot "${item.landCode || item.landName}" from the system?`,
       [
-        { text: "Hủy", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         {
-          text: "Xóa",
+          text: "Delete",
           style: "destructive",
           onPress: async () => {
             try {
               await deleteLand(item.landId);
-              Alert.alert("Thành công", `Đã xóa lô đất "${item.landCode || item.landName}"!`);
+              Alert.alert("Success", `Land plot "${item.landCode || item.landName}" has been deleted!`);
               loadResources();
             } catch (err: any) {
               console.error("Delete land error:", err);
               Alert.alert(
-                "Lỗi",
-                err?.response?.data?.message || "Không thể xóa lô đất. Vui lòng thử lại."
+                "Error",
+                err?.response?.data?.message || "Failed to delete land plot. Please try again."
               );
             }
           },
@@ -209,23 +209,23 @@ export default function ResourcesScreen() {
 
   const handleDeleteEquipment = (item: EquipmentItem) => {
     Alert.alert(
-      "Xác nhận xóa thiết bị",
-      `Bạn có chắc chắn muốn xóa thiết bị "${item.equipmentName}" (@${item.equipmentCode}) không?`,
+      "Confirm Delete Equipment",
+      `Are you sure you want to delete equipment "${item.equipmentName}" (@${item.equipmentCode})?`,
       [
-        { text: "Hủy", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         {
-          text: "Xóa",
+          text: "Delete",
           style: "destructive",
           onPress: async () => {
             try {
               await deleteEquipment(item.equipmentId);
-              Alert.alert("Thành công", `Đã xóa thiết bị "${item.equipmentName}"!`);
+              Alert.alert("Success", `Equipment "${item.equipmentName}" has been deleted!`);
               loadResources();
             } catch (err: any) {
               console.error("Delete equipment error:", err);
               Alert.alert(
-                "Lỗi",
-                err?.response?.data?.message || "Không thể xóa thiết bị. Vui lòng thử lại."
+                "Error",
+                err?.response?.data?.message || "Failed to delete equipment. Please try again."
               );
             }
           },
@@ -317,14 +317,14 @@ export default function ResourcesScreen() {
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <View style={styles.headerTitles}>
-            <Text style={styles.title}>Quản lý Tài nguyên Hiện trường</Text>
+            <Text style={styles.title}>Field Resources Management</Text>
             <Text style={styles.subtitle}>
-              Kiểm soát Phân khu đất, Thiết bị máy móc và Nhân sự
+              Manage Land Areas, Resource Equipments, and Human Resources
             </Text>
           </View>
         </View>
 
-        {/* Tab switcher: Land & Areas, Machinery Assets, Human Resources (Horizontally Scrollable) */}
+        {/* Tab switcher: Land & Areas, Resource Equipments, Human Resources (Horizontally Scrollable) */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -333,7 +333,7 @@ export default function ResourcesScreen() {
         >
           {[
             { key: "land", label: `Land & Areas (${lands.length})` },
-            { key: "equipment", label: `Machinery Assets (${equipments.length})` },
+            { key: "equipment", label: `Resource Equipments (${equipments.length})` },
             { key: "personnel", label: `Human Resources (${personnel.length})` },
           ].map((t) => {
             const isActive = activeTab === t.key;
@@ -364,7 +364,7 @@ export default function ResourcesScreen() {
       {/* LAND TAB: Areas List + Plots in Selected Area */}
       {activeTab === "land" && (
         <View style={{ flex: 1 }}>
-          {/* Areas Section (List of Phân khu đất) */}
+          {/* Areas Section (List of Land Areas) */}
           <View style={styles.areaSection}>
             <View style={styles.sectionTitleRow}>
               <Text style={styles.sectionTitle}>Areas list</Text>
@@ -373,7 +373,7 @@ export default function ResourcesScreen() {
                 activeOpacity={0.7}
               >
                 <Text style={styles.sectionSubtitle}>
-                  {selectedAreaId === null ? "Đang chọn tất cả" : "Xem tất cả"}
+                  {selectedAreaId === null ? "Selecting all" : "View all"}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -417,7 +417,7 @@ export default function ResourcesScreen() {
                     </View>
 
                     <Text style={styles.areaCardDesc} numberOfLines={2}>
-                      {a.description || "Khu vực khảo nghiệm thực địa"}
+                      {a.description || "Field research area"}
                     </Text>
 
                     <View style={styles.areaCardFooter}>
@@ -444,10 +444,10 @@ export default function ResourcesScreen() {
               <Text style={styles.resourceHeaderTitle} numberOfLines={1}>
                 {activeAreaObj
                   ? `${activeAreaObj.areaName} – Land Resources`
-                  : "Tất cả Phân khu – Land Resources"}
+                  : "All Areas – Land Resources"}
               </Text>
               <Text style={styles.resourceHeaderSubtitle}>
-                {filteredLands.length} plots có sẵn
+                {filteredLands.length} plots available
               </Text>
             </View>
 
@@ -484,7 +484,7 @@ export default function ResourcesScreen() {
           {loading ? (
             <View style={styles.centerLoading}>
               <ActivityIndicator size="large" color={Colors.primary} />
-              <Text style={styles.loadingText}>Đang tải danh sách lô đất...</Text>
+              <Text style={styles.loadingText}>Loading land plots...</Text>
             </View>
           ) : (
             <FlatList
@@ -503,7 +503,7 @@ export default function ResourcesScreen() {
                 <View style={styles.emptyWrap}>
                   <Ionicons name="leaf-outline" size={48} color="#cbd5e1" />
                   <Text style={styles.emptyText}>
-                    Không tìm thấy lô đất nào trong phân khu này.
+                    No land plots found in this area.
                   </Text>
                 </View>
               }
@@ -526,7 +526,7 @@ export default function ResourcesScreen() {
                           {item.landCode || `PLOT-${item.landId}`}
                         </Text>
                         <Text style={styles.cardSubtitle}>
-                          {item.areaName || "Phân khu khảo nghiệm"}
+                          {item.areaName || "Research Area"}
                         </Text>
                       </View>
                       <View
@@ -558,7 +558,7 @@ export default function ResourcesScreen() {
                       <View style={styles.detailRow}>
                         <Text style={styles.detailLabel}>SOIL TYPE</Text>
                         <Text style={styles.detailValue}>
-                          {item.soilType || "Đất rừng"}
+                          {item.soilType || "Forest soil"}
                         </Text>
                       </View>
                       {item.location ? (
@@ -604,10 +604,10 @@ export default function ResourcesScreen() {
           <View style={styles.resourceHeaderBanner}>
             <View style={styles.resourceHeaderTitleWrap}>
               <Text style={styles.resourceHeaderTitle} numberOfLines={1}>
-                Machinery & Equipment Assets
+                Resource Equipments
               </Text>
               <Text style={styles.resourceHeaderSubtitle}>
-                {filteredEquipments.length} thiết bị trong hệ thống
+                {filteredEquipments.length} assets in system
               </Text>
             </View>
 
@@ -626,7 +626,7 @@ export default function ResourcesScreen() {
               <Ionicons name="search" size={18} color="#94a3b8" />
               <TextInput
                 style={styles.searchInput}
-                placeholder="Tìm theo tên máy, mã thiết bị, loại..."
+                placeholder="Search by equipment name, code, type..."
                 placeholderTextColor="#94a3b8"
                 value={search}
                 onChangeText={setSearch}
@@ -642,7 +642,7 @@ export default function ResourcesScreen() {
           {loading ? (
             <View style={styles.centerLoading}>
               <ActivityIndicator size="large" color={Colors.primary} />
-              <Text style={styles.loadingText}>Đang tải danh sách thiết bị...</Text>
+              <Text style={styles.loadingText}>Loading equipment list...</Text>
             </View>
           ) : (
             <FlatList
@@ -660,7 +660,7 @@ export default function ResourcesScreen() {
               ListEmptyComponent={
                 <View style={styles.emptyWrap}>
                   <Ionicons name="construct-outline" size={48} color="#cbd5e1" />
-                  <Text style={styles.emptyText}>Không tìm thấy thiết bị phù hợp.</Text>
+                  <Text style={styles.emptyText}>No equipment found.</Text>
                 </View>
               }
               renderItem={({ item }) => {
@@ -674,7 +674,7 @@ export default function ResourcesScreen() {
                       <View style={styles.cardTitleWrap}>
                         <Text style={styles.cardTitle}>{item.equipmentName}</Text>
                         <Text style={styles.cardSubtitle}>
-                          {item.typeName || "Thiết bị chuyên dụng"}
+                          {item.typeName || "Specialized equipment"}
                         </Text>
                       </View>
                       <View style={[styles.statusBadge, { backgroundColor: st.bg }]}>
@@ -688,32 +688,31 @@ export default function ResourcesScreen() {
                     <View style={styles.detailGrid}>
                       {item.equipmentCode ? (
                         <View style={styles.detailRow}>
-                          <Text style={styles.detailLabel}>Mã định danh</Text>
+                          <Text style={styles.detailLabel}>Equipment Code</Text>
                           <Text style={styles.detailValue}>{item.equipmentCode}</Text>
                         </View>
                       ) : null}
                       {item.serialNumber ? (
                         <View style={styles.detailRow}>
-                          <Text style={styles.detailLabel}>Số Serial</Text>
+                          <Text style={styles.detailLabel}>Serial Number</Text>
                           <Text style={styles.detailValue}>{item.serialNumber}</Text>
                         </View>
                       ) : null}
                       {item.efficiencyScore != null ? (
                         <View style={styles.detailRow}>
-                          <Text style={styles.detailLabel}>Hiệu suất vận hành</Text>
+                          <Text style={styles.detailLabel}>Operating Efficiency</Text>
                           <Text style={styles.detailValue}>
                             {Math.round(
                               item.efficiencyScore > 1
                                 ? item.efficiencyScore
                                 : item.efficiencyScore * 100
                             )}
-                            %
                           </Text>
                         </View>
                       ) : null}
                       {item.maintenanceStatus ? (
                         <View style={styles.detailRow}>
-                          <Text style={styles.detailLabel}>Tình trạng bảo trì</Text>
+                          <Text style={styles.detailLabel}>Maintenance Status</Text>
                           <Text style={styles.detailValue}>{item.maintenanceStatus}</Text>
                         </View>
                       ) : null}
@@ -755,7 +754,7 @@ export default function ResourcesScreen() {
               <Ionicons name="search" size={18} color="#94a3b8" />
               <TextInput
                 style={styles.searchInput}
-                placeholder="Tìm theo họ tên, email, vai trò..."
+                placeholder="Search by name, email, role..."
                 placeholderTextColor="#94a3b8"
                 value={search}
                 onChangeText={setSearch}
@@ -771,7 +770,7 @@ export default function ResourcesScreen() {
           {loading ? (
             <View style={styles.centerLoading}>
               <ActivityIndicator size="large" color={Colors.primary} />
-              <Text style={styles.loadingText}>Đang tải danh sách nhân sự...</Text>
+              <Text style={styles.loadingText}>Loading human resources...</Text>
             </View>
           ) : (
             <FlatList
@@ -789,7 +788,7 @@ export default function ResourcesScreen() {
               ListEmptyComponent={
                 <View style={styles.emptyWrap}>
                   <Ionicons name="people-outline" size={48} color="#cbd5e1" />
-                  <Text style={styles.emptyText}>Không có nhân sự thực địa phù hợp.</Text>
+                  <Text style={styles.emptyText}>No field personnel found.</Text>
                 </View>
               }
               renderItem={({ item }) => {
@@ -803,7 +802,7 @@ export default function ResourcesScreen() {
                       </View>
                       <View style={styles.cardTitleWrap}>
                         <Text style={styles.cardTitle}>
-                          {item.fullName || "Nhân sự"}
+                          {item.fullName || "Personnel"}
                         </Text>
                         <Text style={styles.cardSubtitle}>
                           {item.email || (item.username ? `@${item.username}` : "-")}
@@ -830,7 +829,7 @@ export default function ResourcesScreen() {
                       <View style={styles.detailRow}>
                         <Text style={styles.detailLabel}>Max Hours/Day</Text>
                         <Text style={styles.detailValue}>
-                          {item.maxWorkingHoursPerDay} giờ
+                          {item.maxWorkingHoursPerDay} hrs
                         </Text>
                       </View>
                       <View style={styles.detailRow}>

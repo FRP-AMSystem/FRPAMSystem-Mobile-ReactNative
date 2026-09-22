@@ -16,5 +16,6 @@ export async function login(payload: LoginRequest): Promise<{ token: string; use
       },
     };
   }
-  throw new Error(res.data?.message || "Đăng nhập thất bại");
+  throw new Error(res.data?.message || "Login failed");
 }
+

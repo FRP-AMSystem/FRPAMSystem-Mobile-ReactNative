@@ -109,9 +109,9 @@ function buildCalendarDays(year: number, month: number): CalendarDay[] {
   return days;
 }
 
-// Compact event text preview (e.g. "Bay quét...")
+// Compact event text preview (e.g. "Drone scanning...")
 function getEventCompactText(schedule: ScheduleItem): string {
-  return schedule.title || schedule.experimentName || "Ca trực nhiệm vụ";
+  return schedule.title || schedule.experimentName || "Mission Shift";
 }
 
 // Get the dominant status for coloring day background & border
@@ -184,7 +184,7 @@ export default function SchedulesScreen() {
       setSchedules(data || []);
     } catch (err: any) {
       console.error(err);
-      Alert.alert("Lỗi", "Không thể tải danh sách lịch công tác.");
+      Alert.alert("Error", "Failed to load schedule list.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -298,24 +298,24 @@ export default function SchedulesScreen() {
   }, [schedules, year, month]);
 
   const statusOptions: { value: "" | ScheduleStatus; label: string }[] = [
-    { value: "", label: "Tất cả" },
-    { value: "Planned", label: "Đã lên lịch" },
-    { value: "InProgress", label: "Đang làm" },
-    { value: "Completed", label: "Hoàn tất" },
-    { value: "Cancelled", label: "Đã hủy" },
+    { value: "", label: "All" },
+    { value: "Planned", label: "Planned" },
+    { value: "InProgress", label: "In Progress" },
+    { value: "Completed", label: "Completed" },
+    { value: "Cancelled", label: "Cancelled" },
   ];
 
   const getStatusBadgeConfig = (status?: string) => {
     switch (status) {
       case "InProgress":
-        return { bg: "#fef3c7", text: "#b45309", border: "#fde68a", label: "Đang thực hiện" };
+        return { bg: "#fef3c7", text: "#b45309", border: "#fde68a", label: "In Progress" };
       case "Completed":
-        return { bg: "#dcfce7", text: "#15803d", border: "#86efac", label: "Đã hoàn thành" };
+        return { bg: "#dcfce7", text: "#15803d", border: "#86efac", label: "Completed" };
       case "Cancelled":
-        return { bg: "#fee2e2", text: "#b91c1c", border: "#fca5a5", label: "Đã hủy" };
+        return { bg: "#fee2e2", text: "#b91c1c", border: "#fca5a5", label: "Cancelled" };
       case "Planned":
       default:
-        return { bg: "#dbeafe", text: "#1d4ed8", border: "#bfdbfe", label: "Đã lên kế hoạch" };
+        return { bg: "#dbeafe", text: "#1d4ed8", border: "#bfdbfe", label: "Planned" };
     }
   };
 
@@ -339,7 +339,7 @@ export default function SchedulesScreen() {
               style={styles.scopeIcon}
             />
             <Text style={[styles.scopeBtnText, scope === "mine" ? styles.scopeBtnTextActive : null]}>
-              Ca trực của tôi
+              My Shifts
             </Text>
           </TouchableOpacity>
 
@@ -354,7 +354,7 @@ export default function SchedulesScreen() {
               style={styles.scopeIcon}
             />
             <Text style={[styles.scopeBtnText, scope === "all" ? styles.scopeBtnTextActive : null]}>
-              Toàn bộ ca trực
+              All Shifts
             </Text>
           </TouchableOpacity>
         </View>
@@ -376,7 +376,7 @@ export default function SchedulesScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.todayBtn} onPress={goToToday}>
-                <Text style={styles.todayBtnText}>Hôm nay</Text>
+                <Text style={styles.todayBtnText}>Today</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -385,19 +385,19 @@ export default function SchedulesScreen() {
           <View style={styles.legendRow}>
             <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: "#3b82f6" }]} />
-              <Text style={styles.legendText}>Đã lên lịch</Text>
+              <Text style={styles.legendText}>Planned</Text>
             </View>
             <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: "#f59e0b" }]} />
-              <Text style={styles.legendText}>Đang làm</Text>
+              <Text style={styles.legendText}>In Progress</Text>
             </View>
             <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: "#22c55e" }]} />
-              <Text style={styles.legendText}>Hoàn tất</Text>
+              <Text style={styles.legendText}>Completed</Text>
             </View>
             <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: "#ef4444" }]} />
-              <Text style={styles.legendText}>Đã hủy</Text>
+              <Text style={styles.legendText}>Cancelled</Text>
             </View>
           </View>
         </View>
@@ -412,10 +412,10 @@ export default function SchedulesScreen() {
             <Ionicons name="information-circle" size={18} color="#0284c7" />
             <View style={styles.quickJumpContent}>
               <Text style={styles.quickJumpText}>
-                {MONTH_NAMES[month]} {year} không có ca trực.
+                {MONTH_NAMES[month]} {year} has no scheduled shifts.
               </Text>
               <Text style={styles.quickJumpLink}>
-                👉 Bấm để xem {MONTH_NAMES[nearestMonthWithEvents.month]} {nearestMonthWithEvents.year}
+                👉 Tap to view {MONTH_NAMES[nearestMonthWithEvents.month]} {nearestMonthWithEvents.year}
               </Text>
             </View>
           </TouchableOpacity>
@@ -454,7 +454,7 @@ export default function SchedulesScreen() {
           {loading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="small" color={Colors.primary} />
-              <Text style={styles.loadingText}>Đang tải lịch công tác...</Text>
+              <Text style={styles.loadingText}>Loading schedule...</Text>
             </View>
           ) : (
             <View style={styles.daysGrid}>
@@ -561,14 +561,14 @@ export default function SchedulesScreen() {
               </Text>
             </View>
             <View style={styles.taskCountBadge}>
-              <Text style={styles.taskCountText}>{selectedDayEvents.length} ca trực</Text>
+              <Text style={styles.taskCountText}>{selectedDayEvents.length} {selectedDayEvents.length === 1 ? "shift" : "shifts"}</Text>
             </View>
           </View>
 
           {selectedDayEvents.length === 0 ? (
             <View style={styles.emptyDayBox}>
               <Ionicons name="leaf-outline" size={28} color={Colors.textMuted} />
-              <Text style={styles.emptyDayText}>Không có lịch công tác nào trong ngày này.</Text>
+              <Text style={styles.emptyDayText}>No scheduled tasks for this date.</Text>
             </View>
           ) : (
             <View style={styles.dayEventList}>
@@ -586,7 +586,7 @@ export default function SchedulesScreen() {
                   >
                     <View style={styles.eventCardHeader}>
                       <Text style={styles.eventCardTitle}>
-                        {schedule.title || "Ca trực nhiệm vụ"}
+                        {schedule.title || "Mission Shift"}
                       </Text>
                       <View style={[styles.badgePill, { backgroundColor: badge.bg, borderColor: badge.border }]}>
                         <Text style={[styles.badgePillText, { color: badge.text }]}>{badge.label}</Text>
@@ -610,7 +610,7 @@ export default function SchedulesScreen() {
                     <View style={styles.eventInfoRow}>
                       <Ionicons name="time-outline" size={14} color={Colors.textSecondary} style={styles.infoIcon} />
                       <Text style={styles.eventInfoText}>
-                        {schedule.startDate ? schedule.startDate.split("T")[0] : "-"} đến{" "}
+                        {schedule.startDate ? schedule.startDate.split("T")[0] : "-"} to{" "}
                         {schedule.endDate ? schedule.endDate.split("T")[0] : "-"}
                       </Text>
                     </View>
@@ -618,7 +618,7 @@ export default function SchedulesScreen() {
                     {schedule.assignedHumanResourceName ? (
                       <View style={styles.eventInfoRow}>
                         <Ionicons name="person-outline" size={14} color={Colors.textSecondary} style={styles.infoIcon} />
-                        <Text style={styles.eventInfoText}>Phụ trách: {schedule.assignedHumanResourceName}</Text>
+                        <Text style={styles.eventInfoText}>Assigned to: {schedule.assignedHumanResourceName}</Text>
                       </View>
                     ) : null}
 
@@ -629,7 +629,7 @@ export default function SchedulesScreen() {
                     ) : null}
 
                     <View style={styles.viewDetailRow}>
-                      <Text style={styles.viewDetailText}>Xem chi tiết ca trực</Text>
+                      <Text style={styles.viewDetailText}>View shift details</Text>
                       <Ionicons name="chevron-forward" size={13} color={Colors.primary} />
                     </View>
                   </TouchableOpacity>

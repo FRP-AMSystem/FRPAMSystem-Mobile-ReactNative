@@ -30,11 +30,11 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     setError("");
     if (!username.trim()) {
-      setError("Vui lòng nhập tên đăng nhập hoặc email.");
+      setError("Please enter your username or email.");
       return;
     }
     if (!password.trim()) {
-      setError("Vui lòng nhập mật khẩu.");
+      setError("Please enter your password.");
       return;
     }
 
@@ -47,7 +47,7 @@ export default function LoginScreen() {
 
       const result = await loginUser(res.token, res.user);
       if (!result.success) {
-        setError(result.message || "Tài khoản không được phép truy cập.");
+        setError(result.message || "Account is not permitted to access.");
         return;
       }
 
@@ -65,7 +65,7 @@ export default function LoginScreen() {
       console.error(err);
       setError(
         err?.response?.data?.message ||
-        "Đăng nhập không thành công. Vui lòng kiểm tra lại tài khoản & mật khẩu."
+        "Login failed. Please check your username and password."
       );
     } finally {
       setLoading(false);
@@ -86,15 +86,15 @@ export default function LoginScreen() {
             </View>
             <Text style={styles.brandTitle}>FRPAM Mobile</Text>
             <Text style={styles.brandSubtitle}>
-              Hệ thống Quản lý Tài nguyên Hiện trường Lâm nghiệp
+              Forestry Resource Planning & Asset Management System
             </Text>
           </View>
 
           {/* Card Form */}
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Đăng nhập hệ thống</Text>
+            <Text style={styles.cardTitle}>System Login</Text>
             <Text style={styles.cardDesc}>
-              Sử dụng tài khoản được cấp để truy cập hệ thống FRPAM
+              Use your assigned account credentials to access FRPAM
             </Text>
 
             {error ? (
@@ -106,12 +106,12 @@ export default function LoginScreen() {
 
             {/* Username Input */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Tên đăng nhập / Email</Text>
+              <Text style={styles.label}>Username / Email</Text>
               <View style={styles.inputWrapper}>
                 <Ionicons name="person-outline" size={20} color={Colors.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Nhập tên đăng nhập hoặc email"
+                  placeholder="Enter username or email"
                   placeholderTextColor="#94a3b8"
                   autoCapitalize="none"
                   value={username}
@@ -125,12 +125,12 @@ export default function LoginScreen() {
 
             {/* Password Input */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Mật khẩu</Text>
+              <Text style={styles.label}>Password</Text>
               <View style={styles.inputWrapper}>
                 <Ionicons name="lock-closed-outline" size={20} color={Colors.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Nhập mật khẩu"
+                  placeholder="Enter password"
                   placeholderTextColor="#94a3b8"
                   secureTextEntry={!showPassword}
                   value={password}
@@ -164,7 +164,7 @@ export default function LoginScreen() {
               ) : (
                 <>
                   <Ionicons name="log-in-outline" size={20} color="#ffffff" />
-                  <Text style={styles.submitBtnText}>Đăng nhập</Text>
+                  <Text style={styles.submitBtnText}>Log In</Text>
                 </>
               )}
             </TouchableOpacity>

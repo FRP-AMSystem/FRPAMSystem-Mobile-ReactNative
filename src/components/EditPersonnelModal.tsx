@@ -56,11 +56,11 @@ export function EditPersonnelModal({
     const workloadNum = Number(currentWorkload);
 
     if (isNaN(hoursNum) || hoursNum <= 0 || hoursNum > 24) {
-      Alert.alert("Lỗi", "Số giờ làm việc tối đa trong ngày không hợp lệ (1 - 24 giờ).");
+      Alert.alert("Error", "Invalid maximum daily working hours (1 - 24 hours).");
       return;
     }
     if (isNaN(workloadNum) || workloadNum < 0) {
-      Alert.alert("Lỗi", "Khối lượng công việc (Workload) không hợp lệ.");
+      Alert.alert("Error", "Invalid workload value.");
       return;
     }
 
@@ -73,14 +73,14 @@ export function EditPersonnelModal({
         status,
       });
 
-      Alert.alert("Thành công", `Đã cập nhật hồ sơ nhân sự "${profile.fullName || ""}"!`);
+      Alert.alert("Success", `Human resource profile for "${profile.fullName || ""}" has been updated!`);
       onSuccess();
       onClose();
     } catch (err: any) {
       console.error("Update profile error:", err);
       Alert.alert(
-        "Lỗi",
-        err?.response?.data?.message || "Không thể cập nhật hồ sơ nhân sự. Vui lòng thử lại."
+        "Error",
+        err?.response?.data?.message || "Failed to update human resource profile. Please try again."
       );
     } finally {
       setSaving(false);
@@ -102,7 +102,7 @@ export function EditPersonnelModal({
               <View style={styles.modalHeader}>
                 <View>
                   <Text style={styles.modalTitle}>Edit Human Resource Profile</Text>
-                  <Text style={styles.modalSubtitle}>{profile.fullName || "Nhân sự"}</Text>
+                  <Text style={styles.modalSubtitle}>{profile.fullName || "Personnel"}</Text>
                 </View>
                 <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.7}>
                   <Ionicons name="close" size={18} color="#64748b" />
@@ -118,7 +118,7 @@ export function EditPersonnelModal({
                   </Text>
                   <View style={styles.readOnlyBox}>
                     <Text style={styles.readOnlyText}>
-                      {profile.fullName || "Nhân sự"} {profile.roleName ? `(${profile.roleName})` : ""}
+                      {profile.fullName || "Personnel"} {profile.roleName ? `(${profile.roleName})` : ""}
                     </Text>
                   </View>
                 </View>

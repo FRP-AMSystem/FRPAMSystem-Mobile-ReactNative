@@ -27,12 +27,12 @@ export default function AdminSettingsScreen() {
       const duration = Date.now() - start;
       setApiLatency(duration);
       Alert.alert(
-        "Kết nối thành công",
-        `Máy chủ phản hồi tốt trong ${duration}ms.\nAPI Base: ${API_BASE_URL}`
+        "Connection Successful",
+        `Server responded in ${duration}ms.\nAPI Base: ${API_BASE_URL}`
       );
     } catch (err: any) {
       console.error(err);
-      Alert.alert("Lỗi kết nối", "Không thể phản hồi từ máy chủ trung tâm.");
+      Alert.alert("Connection Error", "Unable to connect to central server.");
     } finally {
       setCheckingApi(false);
     }
@@ -40,14 +40,14 @@ export default function AdminSettingsScreen() {
 
   const handleClearCache = () => {
     Alert.alert(
-      "Xóa bộ nhớ đệm",
-      "Bạn có chắc muốn làm mới bộ nhớ đệm và tải lại trạng thái dữ liệu?",
+      "Clear Local Cache",
+      "Are you sure you want to clear local cache and refresh data status?",
       [
-        { text: "Hủy", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         {
-          text: "Xóa Cache",
+          text: "Clear Cache",
           onPress: () => {
-            Alert.alert("Thành công", "Đã xóa bộ nhớ đệm cục bộ ứng dụng.");
+            Alert.alert("Success", "Application local cache has been cleared.");
           },
         },
       ]
@@ -63,9 +63,9 @@ export default function AdminSettingsScreen() {
     >
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Cấu hình & Quản trị Hệ thống</Text>
+        <Text style={styles.title}>System Settings & Administration</Text>
         <Text style={styles.subtitle}>
-          Thông số hạ tầng, trạng thái API và bảo trì hệ thống
+          Infrastructure metrics, API status, and maintenance tasks
         </Text>
       </View>
 
@@ -74,44 +74,44 @@ export default function AdminSettingsScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         {/* System Health */}
-        <Text style={styles.sectionTitle}>Trạng thái Hệ thống</Text>
+        <Text style={styles.sectionTitle}>System Status</Text>
         <View style={styles.card}>
           <View style={styles.statusHeader}>
             <View style={styles.statusIndicator}>
               <View style={styles.dot} />
-              <Text style={styles.statusText}>Máy chủ Đang Hoạt động</Text>
+              <Text style={styles.statusText}>Server Operational</Text>
             </View>
             <View style={styles.pingBadge}>
               <Text style={styles.pingText}>
-                {apiLatency ? `${apiLatency}ms` : "Trực tuyến"}
+                {apiLatency ? `${apiLatency}ms` : "Online"}
               </Text>
             </View>
           </View>
 
           <View style={styles.infoGrid}>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Máy chủ Backend</Text>
+              <Text style={styles.infoLabel}>Backend Host</Text>
               <Text style={styles.infoValue}>RunASP Cloud Host</Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Giao thức AI GA</Text>
-              <Text style={styles.infoValue}>Di truyền (Genetic Algorithm)</Text>
+              <Text style={styles.infoLabel}>AI GA Protocol</Text>
+              <Text style={styles.infoValue}>Genetic Algorithm</Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Phiên bản FRPAM Mobile</Text>
+              <Text style={styles.infoLabel}>FRPAM Mobile Version</Text>
               <Text style={styles.infoValue}>v1.2.0 (Build 2026)</Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Môi trường</Text>
+              <Text style={styles.infoLabel}>Environment</Text>
               <Text style={styles.infoValue}>Production</Text>
             </View>
           </View>
         </View>
 
         {/* Maintenance Actions */}
-        <Text style={styles.sectionTitle}>Tác vụ Quản trị</Text>
+        <Text style={styles.sectionTitle}>Administrative Tasks</Text>
         <View style={styles.actionList}>
-          {/* Kiểm tra API */}
+          {/* API Health Check */}
           <TouchableOpacity
             style={styles.actionItem}
             onPress={handleCheckApi}
@@ -127,16 +127,16 @@ export default function AdminSettingsScreen() {
                 )}
               </View>
               <View style={styles.actionItemTextWrap}>
-                <Text style={styles.actionItemTitle}>Kiểm tra Kết nối API</Text>
+                <Text style={styles.actionItemTitle}>Check API Connectivity</Text>
                 <Text style={styles.actionItemDesc}>
-                  Đo độ trễ và khả năng phản hồi của backend
+                  Measure latency and response time of backend services
                 </Text>
               </View>
             </View>
             <Ionicons name="chevron-forward" size={18} color="#94a3b8" />
           </TouchableOpacity>
 
-          {/* Xóa Cache */}
+          {/* Clear Cache */}
           <TouchableOpacity
             style={styles.actionItem}
             onPress={handleClearCache}
@@ -147,9 +147,9 @@ export default function AdminSettingsScreen() {
                 <Ionicons name="refresh" size={20} color="#d97706" />
               </View>
               <View style={styles.actionItemTextWrap}>
-                <Text style={styles.actionItemTitle}>Làm mới Dữ liệu Cục bộ</Text>
+                <Text style={styles.actionItemTitle}>Refresh Local Data</Text>
                 <Text style={styles.actionItemDesc}>
-                  Xóa bộ nhớ đệm cache và đồng bộ lại
+                  Clear application cache and resynchronize
                 </Text>
               </View>
             </View>

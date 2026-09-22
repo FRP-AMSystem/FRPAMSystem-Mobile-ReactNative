@@ -28,11 +28,11 @@ export default function TabsLayout() {
         },
       }}
     >
-      {/* 1. Manager: Tổng quan Dashboard */}
+      {/* 1. Manager: Overview Dashboard */}
       <Tabs.Screen
         name="dashboard"
         options={{
-          title: "Tổng quan",
+          title: "Dashboard",
           href: isManager ? "/(tabs)/dashboard" : null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="grid-outline" color={color} size={size} />
@@ -40,11 +40,11 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* 2. Admin: Quản lý Người dùng */}
+      {/* 2. Admin: User Management */}
       <Tabs.Screen
         name="admin-users"
         options={{
-          title: "Người dùng",
+          title: "Users",
           href: isAdmin ? "/(tabs)/admin-users" : null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="people-outline" color={color} size={size} />
@@ -52,11 +52,11 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* 3. Admin: Nhật ký Audit */}
+      {/* 3. Admin: Audit Logs */}
       <Tabs.Screen
         name="admin-logs"
         options={{
-          title: "Nhật ký",
+          title: "Audit Logs",
           href: isAdmin ? "/(tabs)/admin-logs" : null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="shield-checkmark-outline" color={color} size={size} />
@@ -64,11 +64,11 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* 4. Admin: Cấu hình hệ thống */}
+      {/* 4. Admin: System Settings */}
       <Tabs.Screen
         name="admin-settings"
         options={{
-          title: "Hệ thống",
+          title: "Settings",
           href: isAdmin ? "/(tabs)/admin-settings" : null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings-outline" color={color} size={size} />
@@ -76,11 +76,11 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* 5. Researcher & Manager: Đề tài Thử nghiệm */}
+      {/* 5. Researcher & Manager: Experiments */}
       <Tabs.Screen
         name="experiments"
         options={{
-          title: "Đề tài",
+          title: "Experiments",
           href: isResearcher || isManager ? "/(tabs)/experiments" : null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="flask-outline" color={color} size={size} />
@@ -88,11 +88,11 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* 6. Researcher & Manager: Kế hoạch Phân bổ */}
+      {/* 6. Researcher & Manager: Allocation Plans */}
       <Tabs.Screen
         name="allocation-plans"
         options={{
-          title: "Phân bổ",
+          title: "Allocations",
           href: isResearcher || isManager ? "/(tabs)/allocation-plans" : null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="git-network-outline" color={color} size={size} />
@@ -100,11 +100,11 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* 7. Manager: Quản lý Tài nguyên Hiện trường */}
+      {/* 7. Manager: Field Resources */}
       <Tabs.Screen
         name="resources"
         options={{
-          title: "Tài nguyên",
+          title: "Resources",
           href: isManager ? "/(tabs)/resources" : null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="layers-outline" color={color} size={size} />
@@ -112,11 +112,11 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* 8. Field Staff: Quản lý Thiết bị */}
+      {/* 8. Field Staff: Equipment Management */}
       <Tabs.Screen
         name="equipment"
         options={{
-          title: "Thiết bị",
+          title: "Equipment",
           href: !isResearcher && !isManager && !isAdmin ? "/(tabs)/equipment" : null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="construct-outline" color={color} size={size} />
@@ -124,11 +124,11 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* 9. Common: Lịch trực / Công tác */}
+      {/* 9. Common: Duty / Work Schedules */}
       <Tabs.Screen
         name="schedules"
         options={{
-          title: "Lịch trực",
+          title: "Schedules",
           href: isResearcher || isFieldStaff ? "/(tabs)/schedules" : null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="calendar-outline" color={color} size={size} />
@@ -136,22 +136,22 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* 10. Common: Thông báo */}
+      {/* 10. Common: Notifications */}
       <Tabs.Screen
         name="notifications"
         options={{
-          title: "Thông báo",
+          title: "Notifications",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="notifications-outline" color={color} size={size} />
           ),
         }}
       />
 
-      {/* 11. Common: Cá nhân */}
+      {/* 11. Common: Profile */}
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Cá nhân",
+          title: "Profile",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-outline" color={color} size={size} />
           ),

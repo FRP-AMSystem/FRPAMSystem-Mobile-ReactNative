@@ -19,18 +19,18 @@ interface RejectReasonModalProps {
   visible: boolean;
   title: string;
   itemTitle?: string;
-  itemType: "đề tài" | "kế hoạch phân bổ";
+  itemType: "experiment" | "allocation plan" | string;
   loading?: boolean;
   onClose: () => void;
   onConfirm: (reason: string) => Promise<void>;
 }
 
 const QUICK_REASONS = [
-  "Thiếu trang thiết bị cần thiết",
-  "Xung đột lịch nhân sự",
-  "Yêu cầu diện tích đất không phù hợp",
-  "Chưa đủ thông tin mô tả kỹ thuật",
-  "Thời gian triển khai quá gấp",
+  "Missing required equipment",
+  "Personnel schedule conflict",
+  "Requested land area is not suitable",
+  "Insufficient technical specification",
+  "Timeline is too tight",
 ];
 
 export const RejectReasonModal: React.FC<RejectReasonModalProps> = ({
@@ -55,7 +55,7 @@ export const RejectReasonModal: React.FC<RejectReasonModalProps> = ({
 
   const handleSubmit = async () => {
     if (!reason.trim()) {
-      Alert.alert("Thông báo", "Vui lòng nhập lý do từ chối để người yêu cầu có thể điều chỉnh.");
+      Alert.alert("Notice", "Please enter the rejection reason so the requester can adjust accordingly.");
       return;
     }
     await onConfirm(reason.trim());
@@ -88,7 +88,7 @@ export const RejectReasonModal: React.FC<RejectReasonModalProps> = ({
             <View style={styles.headerTextWrap}>
               <Text style={styles.title}>{title}</Text>
               <Text style={styles.subtitle}>
-                Từ chối {itemType} và gửi phản hồi
+                Reject {itemType} and send feedback
               </Text>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
@@ -99,7 +99,7 @@ export const RejectReasonModal: React.FC<RejectReasonModalProps> = ({
           {/* Target Info */}
           {itemTitle ? (
             <View style={styles.targetBox}>
-              <Text style={styles.targetLabel}>Đối tượng thẩm định:</Text>
+              <Text style={styles.targetLabel}>Subject:</Text>
               <Text style={styles.targetTitle} numberOfLines={2}>
                 {itemTitle}
               </Text>
@@ -108,11 +108,11 @@ export const RejectReasonModal: React.FC<RejectReasonModalProps> = ({
 
           {/* Input */}
           <Text style={styles.label}>
-            Lý do từ chối <Text style={{ color: "#dc2626" }}>*</Text>
+            Rejection Reason <Text style={{ color: "#dc2626" }}>*</Text>
           </Text>
           <TextInput
             style={styles.input}
-            placeholder="Nhập chi tiết lý do từ chối (bắt buộc)..."
+            placeholder="Enter rejection reason details (required)..."
             placeholderTextColor="#94a3b8"
             multiline
             numberOfLines={4}
@@ -122,7 +122,7 @@ export const RejectReasonModal: React.FC<RejectReasonModalProps> = ({
 
           {/* Quick Reasons */}
           <View style={styles.quickReasonsContainer}>
-            <Text style={styles.quickLabel}>Gợi ý lý do nhanh:</Text>
+            <Text style={styles.quickLabel}>Quick suggestions:</Text>
             <View style={styles.quickPillsWrap}>
               {QUICK_REASONS.map((r, idx) => (
                 <TouchableOpacity
@@ -144,7 +144,7 @@ export const RejectReasonModal: React.FC<RejectReasonModalProps> = ({
               onPress={onClose}
               disabled={loading}
             >
-              <Text style={styles.cancelBtnText}>Hủy bỏ</Text>
+              <Text style={styles.cancelBtnText}>Cancel</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -161,7 +161,7 @@ export const RejectReasonModal: React.FC<RejectReasonModalProps> = ({
               ) : (
                 <>
                   <Ionicons name="close-circle" size={18} color="#ffffff" />
-                  <Text style={styles.confirmBtnText}>Xác nhận từ chối</Text>
+                  <Text style={styles.confirmBtnText}>Confirm Rejection</Text>
                 </>
               )}
             </TouchableOpacity>

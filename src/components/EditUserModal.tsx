@@ -63,7 +63,7 @@ export function EditUserModal({
   const handleSave = async () => {
     if (!user) return;
     if (!fullName.trim()) {
-      Alert.alert("Lỗi", "Vui lòng nhập họ và tên.");
+      Alert.alert("Error", "Please enter the full name.");
       return;
     }
 
@@ -80,8 +80,8 @@ export function EditUserModal({
 
       await updateUser(user.userId, payload);
       Alert.alert(
-        "Thành công",
-        `Đã cập nhật tài khoản "${user.username}" (Trạng thái: ${
+        "Success",
+        `User account "${user.username}" has been updated (Status: ${
           isActive ? "Active" : "Inactive"
         })!`
       );
@@ -90,9 +90,9 @@ export function EditUserModal({
     } catch (err: any) {
       console.error("Update user error:", err);
       Alert.alert(
-        "Lỗi",
+        "Error",
         err?.response?.data?.message ||
-          "Không thể cập nhật tài khoản. Vui lòng thử lại."
+          "Failed to update user account. Please try again."
       );
     } finally {
       setSaving(false);
@@ -146,7 +146,7 @@ export function EditUserModal({
                     style={styles.input}
                     value={fullName}
                     onChangeText={setFullName}
-                    placeholder="Nguyễn Văn Quản Trị"
+                    placeholder="e.g. John Doe"
                     placeholderTextColor="#94a3b8"
                   />
                 </View>
@@ -278,7 +278,7 @@ export function EditUserModal({
                     style={styles.input}
                     value={department}
                     onChangeText={setDepartment}
-                    placeholder="Viện Khảo nghiệm Lâm nghiệp"
+                    placeholder="e.g. Forestry Research Institute"
                     placeholderTextColor="#94a3b8"
                   />
                 </View>

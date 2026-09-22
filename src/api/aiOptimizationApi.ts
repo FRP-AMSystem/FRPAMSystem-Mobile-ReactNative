@@ -74,7 +74,7 @@ export async function generateAISuggestions(
   const rawList: any[] = Array.isArray(rawData) ? rawData : [];
 
   if (rawList.length === 0) {
-    throw new Error("Không có gợi ý phân bổ nào từ thuật toán giải tối ưu.");
+    throw new Error("No allocation suggestions found from the optimization algorithm.");
   }
 
   return rawList.map((item: any, idx: number) => {
@@ -162,7 +162,7 @@ export async function applyAISuggestion(
   }
 
   if (!planId || planId <= 0) {
-    throw new Error("Không thể khởi tạo Kế hoạch phân bổ (Draft Allocation Plan).");
+    throw new Error("Unable to initialize Draft Allocation Plan.");
   }
 
   // 3. Clear previous allocation details for this draft plan
@@ -288,8 +288,8 @@ export async function applyAISuggestion(
         await createSchedule({
           allocationPlanId: planId,
           phaseId: phase?.experimentPhaseId || null,
-          title: `Khảo nghiệm: ${exp?.experimentName || "Đề tài"} - ${phase?.phaseName || "Giai đoạn"}`,
-          description: `Phân công nhân sự: ${hu.fullName || "Kỹ thuật viên"}`,
+          title: `Experiment: ${exp?.experimentName || "Study"} - ${phase?.phaseName || "Phase"}`,
+          description: `Assigned Personnel: ${hu.fullName || "Technician"}`,
           assignedHumanResourceId: humanResourceId,
           startDate,
           endDate,

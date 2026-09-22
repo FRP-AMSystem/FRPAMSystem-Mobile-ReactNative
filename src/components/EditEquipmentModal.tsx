@@ -78,7 +78,7 @@ export function EditEquipmentModal({
             setSerialNumber("");
             setEfficiency("100");
             setStatus("Available");
-            setMaintenanceStatus("Tốt");
+            setMaintenanceStatus("Good");
           }
         })
         .catch((e) => console.warn("Load types error:", e));
@@ -87,11 +87,11 @@ export function EditEquipmentModal({
 
   const handleSave = async () => {
     if (!name.trim()) {
-      Alert.alert("Lỗi", "Vui lòng nhập tên thiết bị.");
+      Alert.alert("Error", "Please enter the equipment name.");
       return;
     }
     if (!code.trim()) {
-      Alert.alert("Lỗi", "Vui lòng nhập mã thiết bị (Equipment Code).");
+      Alert.alert("Error", "Please enter the equipment code.");
       return;
     }
 
@@ -105,16 +105,16 @@ export function EditEquipmentModal({
         equipmentTypeId: typeId || (types.length > 0 ? types[0].equipmentTypeId : 1),
         serialNumber: serialNumber.trim() || undefined,
         efficiencyScore: isNaN(effNum) ? 1 : effNum > 1 ? effNum / 100 : effNum,
-        status,
+        status: equipment ? status : "Available",
         maintenanceStatus: maintenanceStatus.trim() || undefined,
       };
 
       if (equipment) {
         await updateEquipment(equipment.equipmentId, payload);
-        Alert.alert("Thành công", `Đã cập nhật thiết bị "${payload.equipmentName}"!`);
+        Alert.alert("Success", `Equipment "${payload.equipmentName}" has been updated!`);
       } else {
         await createEquipment(payload);
-        Alert.alert("Thành công", `Đã thêm mới thiết bị "${payload.equipmentName}"!`);
+        Alert.alert("Success", `Equipment "${payload.equipmentName}" has been created!`);
       }
 
       onSuccess();
@@ -122,8 +122,8 @@ export function EditEquipmentModal({
     } catch (err: any) {
       console.error("Save equipment error:", err);
       Alert.alert(
-        "Lỗi",
-        err?.response?.data?.message || "Không thể lưu thiết bị. Vui lòng thử lại."
+        "Error",
+        err?.response?.data?.message || "Failed to save equipment. Please try again."
       );
     } finally {
       setSaving(false);
@@ -145,10 +145,10 @@ export function EditEquipmentModal({
               <View style={styles.modalHeader}>
                 <View>
                   <Text style={styles.modalTitle}>
-                    {equipment ? "Edit Machinery / Asset" : "Add Machinery / Asset"}
+                    {equipment ? "Edit Resource Equipment" : "Add Resource Equipment"}
                   </Text>
                   <Text style={styles.modalSubtitle}>
-                    {equipment ? equipment.equipmentName : "Thêm mới thiết bị chuyên dụng"}
+                    {equipment ? equipment.equipmentName : "Add new specialized resource equipment"}
                   </Text>
                 </View>
                 <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.7}>
@@ -167,7 +167,7 @@ export function EditEquipmentModal({
                     style={styles.input}
                     value={name}
                     onChangeText={setName}
-                    placeholder="Ví dụ: Máy đo quang hợp LCpro T"
+                    placeholder="e.g. LCpro T Photosynthesis System"
                     placeholderTextColor="#94a3b8"
                   />
                 </View>
@@ -242,34 +242,36 @@ export function EditEquipmentModal({
                   />
                 </View>
 
-                {/* Status */}
-                <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>
-                    Status <Text style={styles.required}>*</Text>
-                  </Text>
-                  <View style={styles.statusGrid}>
-                    {STATUS_OPTIONS.map((opt) => {
-                      const isActive = status.toLowerCase() === opt.key.toLowerCase();
-                      return (
-                        <TouchableOpacity
-                          key={opt.key}
-                          style={[styles.statusOption, isActive && styles.statusOptionActive]}
-                          onPress={() => setStatus(opt.key)}
-                          activeOpacity={0.8}
-                        >
-                          <Text
-                            style={[
-                              styles.statusOptionText,
-                              isActive && styles.statusOptionTextActive,
-                            ]}
+                {/* Status - only shown when editing existing equipment */}
+                {equipment ? (
+                  <View style={styles.fieldGroup}>
+                    <Text style={styles.fieldLabel}>
+                      Status <Text style={styles.required}>*</Text>
+                    </Text>
+                    <View style={styles.statusGrid}>
+                      {STATUS_OPTIONS.map((opt) => {
+                        const isActive = status.toLowerCase() === opt.key.toLowerCase();
+                        return (
+                          <TouchableOpacity
+                            key={opt.key}
+                            style={[styles.statusOption, isActive && styles.statusOptionActive]}
+                            onPress={() => setStatus(opt.key)}
+                            activeOpacity={0.8}
                           >
-                            {opt.label}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
+                            <Text
+                              style={[
+                                styles.statusOptionText,
+                                isActive && styles.statusOptionTextActive,
+                              ]}
+                            >
+                              {opt.label}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
                   </View>
-                </View>
+                ) : null}
               </ScrollView>
 
               {/* Footer */}
@@ -293,7 +295,7 @@ export function EditEquipmentModal({
                     <ActivityIndicator size="small" color="#ffffff" />
                   ) : (
                     <Text style={styles.saveBtnText}>
-                      {equipment ? "Save Changes" : "Add Equipment"}
+                      {equipment ? "Save Changes" : "Add Resource Equipment"}
                     </Text>
                   )}
                 </TouchableOpacity>

@@ -23,7 +23,7 @@ function formatDate(dateStr?: string | null): string {
   if (!dateStr) return "-";
   const d = new Date(dateStr);
   if (Number.isNaN(d.getTime())) return dateStr;
-  return d.toLocaleString("vi-VN", {
+  return d.toLocaleString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
@@ -39,46 +39,46 @@ function getNotificationCategory(item: NotificationItem | null) {
 
   if (type.includes("Schedule") || refType === "Schedule") {
     return {
-      label: "Lịch Ca trực & Phân công",
+      label: "Shift Schedule & Assignment",
       icon: "calendar" as const,
       color: "#2563eb",
       bg: "#eff6ff",
-      refName: "Ca trực hiện trường",
+      refName: "Field Duty Shift",
     };
   }
   if (type.includes("Experiment") || refType === "Experiment") {
     return {
-      label: "Đề tài & Kế hoạch Thử nghiệm",
+      label: "Experiment & Research Plan",
       icon: "flask" as const,
       color: "#16a34a",
       bg: "#f0fdf4",
-      refName: "Đề tài nghiên cứu",
+      refName: "Research Experiment",
     };
   }
   if (type.includes("Allocation") || refType === "AllocationPlan") {
     return {
-      label: "Phân bổ Tài nguyên",
+      label: "Resource Allocation",
       icon: "git-network" as const,
       color: "#9333ea",
       bg: "#faf5ff",
-      refName: "Kế hoạch điều phối",
+      refName: "Coordination Plan",
     };
   }
   if (type.includes("Equipment") || refType?.includes("Equipment")) {
     return {
-      label: "Thiết bị & Bàn giao",
+      label: "Machinery & Handover",
       icon: "construct" as const,
       color: "#d97706",
       bg: "#fffbeb",
-      refName: "Tài sản thiết bị",
+      refName: "Machinery / Equipment",
     };
   }
   return {
-    label: "Thông báo Hệ thống",
+    label: "System Notification",
     icon: "notifications" as const,
     color: "#475569",
     bg: "#f1f5f9",
-    refName: "Hạng mục liên quan",
+    refName: "Related Item",
   };
 }
 
@@ -130,7 +130,7 @@ export function NotificationDetailModal({
             {notification.referenceType ? (
               <View style={styles.refBox}>
                 <Ionicons name="link-outline" size={16} color="#15803d" />
-                <Text style={styles.refLabel}>Hạng mục liên quan:</Text>
+                <Text style={styles.refLabel}>Related category:</Text>
                 <Text style={styles.refValue}>{category.refName}</Text>
               </View>
             ) : null}
@@ -148,7 +148,7 @@ export function NotificationDetailModal({
                 activeOpacity={0.8}
               >
                 <Ionicons name="eye-outline" size={16} color="#ffffff" style={{ marginRight: 6 }} />
-                <Text style={styles.primaryBtnText}>Xem Chi tiết Ca trực</Text>
+                <Text style={styles.primaryBtnText}>View Shift Details</Text>
               </TouchableOpacity>
             ) : null}
 
@@ -162,7 +162,7 @@ export function NotificationDetailModal({
                 activeOpacity={0.8}
               >
                 <Ionicons name="flask-outline" size={16} color="#ffffff" style={{ marginRight: 6 }} />
-                <Text style={styles.primaryBtnText}>Xem Chi tiết Đề tài</Text>
+                <Text style={styles.primaryBtnText}>View Experiment Details</Text>
               </TouchableOpacity>
             ) : null}
 
@@ -176,12 +176,12 @@ export function NotificationDetailModal({
                 activeOpacity={0.8}
               >
                 <Ionicons name="git-network-outline" size={16} color="#ffffff" style={{ marginRight: 6 }} />
-                <Text style={styles.primaryBtnText}>Xem Kế hoạch Phân bổ</Text>
+                <Text style={styles.primaryBtnText}>View Allocation Plan</Text>
               </TouchableOpacity>
             ) : null}
 
             <TouchableOpacity style={styles.secondaryBtn} onPress={onClose} activeOpacity={0.8}>
-              <Text style={styles.secondaryBtnText}>Đóng</Text>
+              <Text style={styles.secondaryBtnText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -12,12 +12,12 @@ export async function getLands(params?: {
   return list.map((l) => ({
     landId: l.landId,
     landCode: l.landCode || `PLOT-${l.landId}`,
-    landName: l.landCode || `Lô đất #${l.landId}`,
+    landName: l.landCode || `Land Plot #${l.landId}`,
     areaId: l.areaId,
     areaName: l.areaName,
     areaSize: l.areaSize,
     area: l.areaSize,
-    soilType: l.soilType || "Đất rừng",
+    soilType: l.soilType || "Forest soil",
     status: l.status || "Available",
     location: l.location,
     description: l.description,
@@ -58,7 +58,7 @@ export async function getLandById(id: number): Promise<LandItem> {
   return {
     landId: Number(l.landId || l.id || 0),
     landCode: l.landCode || `PLOT-${l.landId || l.id}`,
-    landName: l.landCode || `Lô đất #${l.landId}`,
+    landName: l.landCode || `Land Plot #${l.landId}`,
     areaId: Number(l.areaId || 0),
     areaName: l.areaName || l.area?.areaName || "",
     areaSize: Number(l.areaSize ?? l.size ?? 0),

@@ -102,7 +102,23 @@ export async function getAllocationPlans(params?: {
     },
   });
   const rawList = res.data?.data?.items || res.data?.items || res.data?.data || [];
-  return enrichAllocationPlans(rawList);
+  const mappedList: AllocationPlanItem[] = rawList.map((p: any) => ({
+    ...p,
+    allocationPlanId: Number(p.allocationPlanId ?? p.id ?? 0),
+    experimentId: Number(p.experimentId ?? p.expId ?? 0),
+    createdBy: p.createdBy
+      ? Number(p.createdBy)
+      : p.userId
+      ? Number(p.userId)
+      : p.creatorId
+      ? Number(p.creatorId)
+      : p.researcherId
+      ? Number(p.researcherId)
+      : undefined,
+    createdByName: p.createdByName || p.creator?.fullName || p.creator?.username || "",
+    approveStatus: p.approveStatus || p.status || "Pending",
+  }));
+  return enrichAllocationPlans(mappedList);
 }
 
 export async function getAllocationPlanById(id: number): Promise<AllocationPlanItem> {

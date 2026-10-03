@@ -1,11 +1,10 @@
 export type ExperimentStatus =
   | "Draft"
-  | "Created"
-  | "Pending"
-  | "Approved"
+  | "Submitted"
+  | "Planning"
+  | "Ready"
   | "Running"
   | "Completed"
-  | "Rejected"
   | "Cancelled";
 
 export type PriorityLevel = "0" | "1" | "2" | "3"; // 0: Low, 1: Medium, 2: High, 3: Urgent

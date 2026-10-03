@@ -27,6 +27,21 @@ function getInitials(name?: string): string {
   return `${first}${last}`.toUpperCase();
 }
 
+function formatDate(dateStr?: string | null): string {
+  if (!dateStr) return "-";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime()) || d.getFullYear() < 2000) return "-";
+    return d.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return "-";
+  }
+}
+
 export function UserDetailsModal({
   visible,
   user,
@@ -124,6 +139,22 @@ export function UserDetailsModal({
                 <View style={styles.detailsList}>
                   <View style={styles.detailItem}>
                     <View style={styles.detailLabelWrap}>
+                      <Ionicons name="key-outline" size={16} color="#64748b" />
+                      <Text style={styles.detailLabel}>User ID</Text>
+                    </View>
+                    <Text style={styles.detailValue}>#{user.userId || user.id}</Text>
+                  </View>
+
+                  <View style={styles.detailItem}>
+                    <View style={styles.detailLabelWrap}>
+                      <Ionicons name="at-outline" size={16} color="#64748b" />
+                      <Text style={styles.detailLabel}>Username</Text>
+                    </View>
+                    <Text style={styles.detailValue}>@{user.username || "-"}</Text>
+                  </View>
+
+                  <View style={styles.detailItem}>
+                    <View style={styles.detailLabelWrap}>
                       <Ionicons name="mail-outline" size={16} color="#64748b" />
                       <Text style={styles.detailLabel}>Email</Text>
                     </View>
@@ -132,26 +163,10 @@ export function UserDetailsModal({
 
                   <View style={styles.detailItem}>
                     <View style={styles.detailLabelWrap}>
-                      <Ionicons name="call-outline" size={16} color="#64748b" />
-                      <Text style={styles.detailLabel}>Phone Number</Text>
-                    </View>
-                    <Text style={styles.detailValue}>{user.phoneNumber || "-"}</Text>
-                  </View>
-
-                  <View style={styles.detailItem}>
-                    <View style={styles.detailLabelWrap}>
-                      <Ionicons name="business-outline" size={16} color="#64748b" />
-                      <Text style={styles.detailLabel}>Department</Text>
-                    </View>
-                    <Text style={styles.detailValue}>{user.department || "-"}</Text>
-                  </View>
-
-                  <View style={styles.detailItem}>
-                    <View style={styles.detailLabelWrap}>
                       <Ionicons name="calendar-outline" size={16} color="#64748b" />
                       <Text style={styles.detailLabel}>Created Date</Text>
                     </View>
-                    <Text style={styles.detailValue}>{user.createdAt || "-"}</Text>
+                    <Text style={styles.detailValue}>{formatDate(user.createdAt)}</Text>
                   </View>
                 </View>
               </ScrollView>

@@ -1,0 +1,69 @@
+@startuml FRPAM_Mobile_Clean_Architecture_Package_Diagram
+skinparam packageStyle folder
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam roundCorner 0
+skinparam monochrome true
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 50
+
+skinparam package {
+  BackgroundColor white
+  BorderColor black
+}
+
+skinparam arrow {
+  Color black
+}
+
+package " " as OuterApp {
+
+  package "presentation" as Presentation {
+    package "app" as app
+    package "components" as components
+    package "hooks" as hooks
+
+    components .left.> app
+    app .down.> hooks
+  }
+
+  package "domain" as Domain {
+    package "usecases" as usecases
+    package "entities" as entities
+    package "contracts" as contracts
+
+    usecases -[hidden]right- entities
+    entities -[hidden]right- contracts
+
+    usecases .right.> entities
+    usecases .right.> contracts
+  }
+
+  package "data" as Data {
+    package "datasources" as datasources
+    package "repositories" as repositories
+    package "mappers" as mappers
+
+    datasources -[hidden]right- repositories
+    repositories -[hidden]right- mappers
+
+    repositories .left.> datasources
+    repositories .right.> mappers
+  }
+
+  package "ENV" as ENV
+
+  ' Inter-layer dependencies
+  hooks .down.> usecases
+  app .down.> entities
+
+  repositories .up.> contracts
+  repositories .up.> entities
+
+  datasources .left.> ENV
+}
+
+caption Figure 13. Mobile Clean Architecture Package Diagram (Target Structure)
+@enduml

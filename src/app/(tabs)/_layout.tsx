@@ -112,19 +112,7 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* 8. Field Staff: Equipment Management */}
-      <Tabs.Screen
-        name="equipment"
-        options={{
-          title: "Equipment",
-          href: !isResearcher && !isManager && !isAdmin ? "/(tabs)/equipment" : null,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="construct-outline" color={color} size={size} />
-          ),
-        }}
-      />
-
-      {/* 9. Common: Duty / Work Schedules */}
+      {/* 8. Common: Duty / Work Schedules */}
       <Tabs.Screen
         name="schedules"
         options={{
@@ -132,6 +120,18 @@ export default function TabsLayout() {
           href: isResearcher || isFieldStaff ? "/(tabs)/schedules" : null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="calendar-outline" color={color} size={size} />
+          ),
+        }}
+      />
+
+      {/* 9. Field Staff: Equipment Management */}
+      <Tabs.Screen
+        name="equipment"
+        options={{
+          title: "Equipment",
+          href: !isResearcher && !isManager && !isAdmin ? "/(tabs)/equipment" : null,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="construct-outline" color={color} size={size} />
           ),
         }}
       />

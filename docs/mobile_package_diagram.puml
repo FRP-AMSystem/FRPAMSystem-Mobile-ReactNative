@@ -1,0 +1,63 @@
+@startuml FRPAM_Mobile_Current_Package_Diagram
+skinparam packageStyle folder
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam roundCorner 0
+skinparam monochrome true
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 50
+
+skinparam package {
+  BackgroundColor white
+  BorderColor black
+}
+
+skinparam arrow {
+  Color black
+}
+
+package " " as OuterApp {
+
+  package "UI" as UI {
+    package "app" as app
+    package "components" as components
+
+    app -[hidden]right- components
+    components .left.> app
+  }
+
+  package "Service" as Service {
+    package "hooks" as hooks
+    package "types" as types
+
+    package "context" as context
+    package "api" as api
+    package "utils" as utils
+
+    hooks -[hidden]right- types
+    hooks -[hidden]down- context
+    types -[hidden]down- api
+
+    context -[hidden]right- api
+    api -[hidden]right- utils
+
+    api .up.> types
+    context .right.> api
+    context .right.> utils
+    api .right.> utils
+  }
+
+  package "ENV" as ENV
+
+  app .down.> api
+  app .down.> context
+  app .down.> hooks
+  components .down.> api
+
+  api .down.> ENV
+}
+
+caption Figure 12. FRPAM Mobile Package Diagram (Current Architecture)
+@enduml

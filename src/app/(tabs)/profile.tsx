@@ -23,7 +23,7 @@ export default function ProfileScreen() {
         setDetailedUser(data);
       }
     } catch (err) {
-      console.warn("Could not fetch extended profile details:", err);
+      console.warn("Could not fetch profile details:", err);
     }
   };
 
@@ -55,17 +55,36 @@ export default function ProfileScreen() {
     const currentRole = detailedUser?.roleName || role;
     if (currentRole === "Technician") return "Field Technician";
     if (currentRole === "Seasonal") return "Seasonal Worker";
+    if (currentRole === "Student") return "Student / Intern";
     if (currentRole === "Researcher") return "Lead Researcher";
     if (currentRole === "Manager") return "Operations Manager";
     if (currentRole === "Admin" || currentRole === "SystemAdmin") return "System Administrator";
     return currentRole || "Staff Member";
   };
 
+  const formatDate = (dateStr?: string | null) => {
+    if (!dateStr) return null;
+    try {
+      const d = new Date(dateStr);
+      // Filter out invalid dates or default .NET DateTime.MinValue (year 0001 / < 2000)
+      if (isNaN(d.getTime()) || d.getFullYear() < 2000) return null;
+      return d.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    } catch {
+      return null;
+    }
+  };
+
   const email = detailedUser?.email || user?.email || "No email provided";
   const username = detailedUser?.username || user?.username || "-";
   const fullName = detailedUser?.fullName || user?.fullName || user?.username || "User";
-  const phoneNumber = detailedUser?.phoneNumber || user?.phoneNumber || "Not provided";
-  const department = detailedUser?.department || user?.department || "Field Operations";
+  const createdAt = detailedUser?.createdAt || null;
+  const updatedAt = detailedUser?.updatedAt || null;
+  const joinedDateFormatted = formatDate(createdAt);
+  const updatedAtFormatted = formatDate(updatedAt);
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -84,7 +103,7 @@ export default function ProfileScreen() {
           />
         }
       >
-        {/* User Card */}
+        {/* Hero User Card */}
         <View style={styles.userCard}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
@@ -100,36 +119,57 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Info Section */}
-        <View style={styles.infoSection}>
-          <View style={styles.infoItem}>
-            <Ionicons name="person-outline" size={18} color={Colors.textMuted} />
-            <Text style={styles.infoLabel}>Username:</Text>
-            <Text style={styles.infoValue}>{username}</Text>
+        {/* User Account Details Section */}
+        <View style={styles.sectionCard}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="person-circle-outline" size={18} color={Colors.primary} />
+            <Text style={styles.sectionTitle}>Account Details</Text>
           </View>
 
-          <View style={styles.infoItem}>
-            <Ionicons name="mail-outline" size={18} color={Colors.textMuted} />
-            <Text style={styles.infoLabel}>Email:</Text>
-            <Text style={styles.infoValue}>{email}</Text>
-          </View>
+          <View style={styles.infoList}>
+            <View style={styles.infoItem}>
+              <View style={styles.infoLeft}>
+                <Ionicons name="at-outline" size={16} color={Colors.textMuted} />
+                <Text style={styles.infoLabel}>Username:</Text>
+              </View>
+              <Text style={styles.infoValue}>@{username}</Text>
+            </View>
 
-          <View style={styles.infoItem}>
-            <Ionicons name="call-outline" size={18} color={Colors.textMuted} />
-            <Text style={styles.infoLabel}>Phone Number:</Text>
-            <Text style={styles.infoValue}>{phoneNumber}</Text>
-          </View>
+            <View style={styles.infoItem}>
+              <View style={styles.infoLeft}>
+                <Ionicons name="mail-outline" size={16} color={Colors.textMuted} />
+                <Text style={styles.infoLabel}>Email:</Text>
+              </View>
+              <Text style={styles.infoValue}>{email}</Text>
+            </View>
 
-          <View style={styles.infoItem}>
-            <Ionicons name="business-outline" size={18} color={Colors.textMuted} />
-            <Text style={styles.infoLabel}>Department:</Text>
-            <Text style={styles.infoValue}>{department}</Text>
-          </View>
+            <View style={styles.infoItem}>
+              <View style={styles.infoLeft}>
+                <Ionicons name="shield-outline" size={16} color={Colors.textMuted} />
+                <Text style={styles.infoLabel}>System Role:</Text>
+              </View>
+              <Text style={styles.infoValue}>{getRoleLabel()}</Text>
+            </View>
 
-          <View style={styles.infoItem}>
-            <Ionicons name="checkmark-circle-outline" size={18} color="#16a34a" />
-            <Text style={styles.infoLabel}>Account Status:</Text>
-            <Text style={[styles.infoValue, { color: "#16a34a" }]}>Active</Text>
+            {joinedDateFormatted ? (
+              <View style={styles.infoItem}>
+                <View style={styles.infoLeft}>
+                  <Ionicons name="calendar-outline" size={16} color={Colors.textMuted} />
+                  <Text style={styles.infoLabel}>Joined Date:</Text>
+                </View>
+                <Text style={styles.infoValue}>{joinedDateFormatted}</Text>
+              </View>
+            ) : null}
+
+            {updatedAtFormatted ? (
+              <View style={styles.infoItem}>
+                <View style={styles.infoLeft}>
+                  <Ionicons name="time-outline" size={16} color={Colors.textMuted} />
+                  <Text style={styles.infoLabel}>Last Updated:</Text>
+                </View>
+                <Text style={styles.infoValue}>{updatedAtFormatted}</Text>
+              </View>
+            ) : null}
           </View>
         </View>
 

@@ -71,8 +71,6 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [selectedRole, setSelectedRole] = useState<RoleConfig | null>(null);
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [department, setDepartment] = useState("");
 
   useEffect(() => {
     if (visible) {
@@ -99,8 +97,6 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
     setUsername("");
     setEmail("");
     setPassword("");
-    setPhoneNumber("");
-    setDepartment("");
     if (roles.length > 0) {
       setSelectedRole(roles.find((m) => m.name === "Researcher") || roles[0]);
     }
@@ -136,8 +132,6 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
       password: password.trim(),
       roleId: selectedRole?.id || 3,
       roleName: selectedRole?.name || "Researcher",
-      phoneNumber: phoneNumber.trim() || undefined,
-      department: department.trim() || undefined,
     };
 
     await onSubmit(payload);
@@ -330,47 +324,6 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     </TouchableOpacity>
                   );
                 })}
-              </View>
-            </View>
-
-            {/* Phone Number */}
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Phone Number (Optional)</Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons
-                  name="call-outline"
-                  size={18}
-                  color={Colors.textMuted}
-                  style={styles.inputIcon}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="e.g. 0987654321"
-                  placeholderTextColor="#94a3b8"
-                  keyboardType="phone-pad"
-                  value={phoneNumber}
-                  onChangeText={setPhoneNumber}
-                />
-              </View>
-            </View>
-
-            {/* Department */}
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Department (Optional)</Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons
-                  name="business-outline"
-                  size={18}
-                  color={Colors.textMuted}
-                  style={styles.inputIcon}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="e.g. Tree Breeding Division"
-                  placeholderTextColor="#94a3b8"
-                  value={department}
-                  onChangeText={setDepartment}
-                />
               </View>
             </View>
           </ScrollView>

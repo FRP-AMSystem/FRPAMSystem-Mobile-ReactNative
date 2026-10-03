@@ -1,0 +1,115 @@
+@startuml FRPAM_System_Architecture_Diagram
+title Sơ Đồ Kiến Trúc Hệ Thống FRPAM Mobile (System Architecture Diagram)
+
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI", Arial, sans-serif
+skinparam defaultFontSize 12
+skinparam roundCorner 8
+skinparam linetype ortho
+skinparam nodesep 30
+skinparam ranksep 40
+
+' Colors
+skinparam package {
+  BackgroundColor<<Actors>> #FDEDEC
+  BorderColor<<Actors>> #C0392B
+  BackgroundColor<<Presentation>> #EBF5FB
+  BorderColor<<Presentation>> #2980B9
+  BackgroundColor<<State>> #FEF9E7
+  BorderColor<<State>> #F39C12
+  BackgroundColor<<Network>> #E8F8F5
+  BorderColor<<Network>> #16A085
+  BackgroundColor<<Backend>> #F2F4F4
+  BorderColor<<Backend>> #7F8C8D
+}
+
+' 1. Actors Layer
+package "1. Người Dùng & Phân Quyền (Actors / Roles)" <<Actors>> {
+  rectangle "🔬 Researcher (Nhà nghiên cứu)\n- Tạo thí nghiệm, yêu cầu tài nguyên\n- Xem kế hoạch & tối ưu AI" as ActorResearcher
+  rectangle "👔 Manager (Quản lý dự án)\n- Duyệt thí nghiệm, duyệt kế hoạch\n- Quản lý đất, thiết bị, nhân sự" as ActorManager
+  rectangle "🛠️ Technician / Seasonal (Kỹ thuật viên / Lao động)\n- Xem lịch làm việc & nhiệm vụ hiện trường" as ActorWorker
+  rectangle "⚙️ Admin / SystemAdmin (Quản trị viên)\n- Quản lý người dùng, xem nhật ký Audit Log" as ActorAdmin
+
+  ActorResearcher -[hidden]right- ActorManager
+  ActorManager -[hidden]right- ActorWorker
+  ActorWorker -[hidden]right- ActorAdmin
+}
+
+' 2. Mobile App System
+package "2. Ứng Dụng Di Động FRPAM Mobile (React Native / Expo SDK)" {
+
+  ' Presentation Layer
+  package "Tầng Giao Diện (Presentation Layer)" <<Presentation>> {
+    package "Màn hình điều hướng (src/app - Expo Router)" as AppScreens {
+      rectangle "Đăng nhập\n(auth/login)" as S_Login
+      rectangle "Dashboard & Thống kê\n(dashboard)" as S_Dash
+      rectangle "Quản lý Thí nghiệm\n(experiments)" as S_Exp
+      rectangle "Kế hoạch Phân bổ AI\n(allocation-plans)" as S_Plan
+      rectangle "Quản lý Tài nguyên\n(resources & equipment)" as S_Res
+      rectangle "Lịch trình & Tác vụ\n(schedules)" as S_Sched
+      rectangle "Quản trị & Thông báo\n(admin-* & notifications)" as S_Admin
+    }
+
+    package "Thành phần dùng chung (src/components)" as AppComponents {
+      rectangle "Modals Nghiệp vụ\n(CreateExp, EditLand, EditEquip, AISuggestion, DetailModals...)" as C_Modals
+      rectangle "Shared UI Widgets\n(ThemedText, ThemedView, Badges, Pickers...)" as C_Shared
+    }
+
+    AppScreens .right.> AppComponents : nhúng & hiển thị
+  }
+
+  ' State & Logic Layer
+  package "Tầng Quản Lý Trạng Thái & Định Kiểu (State & Logic Layer)" <<State>> {
+    rectangle "AuthContext (src/context)\n- Quản lý trạng thái đăng nhập\n- Lưu JWT Token & thông tin User\n- Phân quyền giao diện (RBAC)" as M_Auth
+    rectangle "Custom Hooks (src/hooks)\n- useTheme, useColorScheme" as M_Hooks
+    rectangle "TypeScript Types & DTOs (src/types)\n- Experiment, Land, Equip, AI, Plan DTOs" as M_Types
+
+    M_Auth -[hidden]right- M_Hooks
+    M_Hooks -[hidden]right- M_Types
+  }
+
+  ' Network & Storage Layer
+  package "Tầng Dịch Vụ & Mạng (Network & Local Storage)" <<Network>> {
+    rectangle "Biến môi trường (.env)\nEXPO_PUBLIC_API_BASE_URL\n(src/constants/config.ts)" as M_Env
+    rectangle "Local Storage & JWT (src/utils)\n- AsyncStorage (lưu token, profile)\n- jwt.ts (giải mã & kiểm tra token)" as M_Storage
+    rectangle "Axios HTTP Client (src/api/client.ts)\n- Tự động gắn Bearer Token\n- Interceptor xử lý 401 Unauthorized" as M_Client
+    rectangle "API Domain Services (src/api/*)\n- authApi, experimentApi, landApi\n- allocationPlanApi, aiOptimizationApi\n- personnelApi, scheduleApi, userApi..." as M_Apis
+
+    M_Env -[hidden]right- M_Storage
+    M_Storage -[hidden]right- M_Client
+    M_Client -[hidden]right- M_Apis
+  }
+}
+
+' 3. Backend & Cloud Infrastructure
+package "3. Hệ Thống Backend & Máy Chủ Trung Tâm (Server Side)" <<Backend>> {
+  rectangle "FRPAM Central REST API Server\n(ASP.NET Core Web API / Swagger)" as BE_Api
+  rectangle "AI Optimization Engine\n(Genetic Algorithm / Solver tối ưu phân bổ tài nguyên)" as BE_AI
+  database "Cơ Sở Dữ Liệu Tập Trung\n(Central Database: SQL Server)" as BE_DB
+
+  BE_Api <--> BE_AI : Thực thi thuật toán
+  BE_Api <--> BE_DB : Truy vấn dữ liệu (Entity Framework)
+}
+
+' Data flows
+ActorResearcher ..> AppScreens : thao tác
+ActorManager ..> AppScreens : thao tác
+ActorWorker ..> AppScreens : thao tác
+ActorAdmin ..> AppScreens : thao tác
+
+AppScreens --> M_Auth : kiểm tra quyền & user
+AppScreens --> M_Hooks : giao diện & theme
+AppScreens --> M_Apis : gọi dữ liệu màn hình
+C_Modals --> M_Apis : gửi form dữ liệu
+
+M_Auth --> M_Storage : lưu / đọc token & user
+M_Auth --> M_Apis : gọi login & profile
+
+M_Env --> M_Client : cung cấp Base URL
+M_Storage --> M_Client : cung cấp Bearer Token
+M_Apis --> M_Client : thực thi HTTP request
+M_Apis ..> M_Types : kiểm tra kiểu dữ liệu
+
+M_Client ==> BE_Api : HTTPS / RESTful JSON Requests
+
+@enduml

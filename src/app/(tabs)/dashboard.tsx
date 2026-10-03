@@ -24,7 +24,7 @@ import { styles } from "../../styles/dashboard.styles";
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isResearcher, isManager, isAdmin } = useAuth();
 
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [pendingExps, setPendingExps] = useState<ExperimentItem[]>([]);
@@ -42,21 +42,36 @@ export default function DashboardScreen() {
     try {
       const [m, exps, plans] = await Promise.all([
         getDashboardMetrics(),
-        getExperiments({ Size: 20 }),
-        getAllocationPlans({ Size: 20 }),
+        getExperiments({ Size: 50 }),
+        getAllocationPlans({ Size: 50 }),
       ]);
 
       setMetrics(m);
 
+      let rawExps = exps || [];
+      let rawPlans = plans || [];
+
+      if (isResearcher && !isManager && !isAdmin && user?.userId) {
+        rawExps = rawExps.filter(
+          (e) => Number(e.researcherId) === Number(user.userId)
+        );
+        const myExpIds = new Set(rawExps.map((e) => Number(e.experimentId)));
+        rawPlans = rawPlans.filter((p) => {
+          const matchCreator = Number(p.createdBy) === Number(user.userId);
+          const matchExp = p.experimentId && myExpIds.has(Number(p.experimentId));
+          return matchCreator || matchExp;
+        });
+      }
+
       // Filter pending items
-      const pExps = (exps || []).filter((e) =>
+      const pExps = rawExps.filter((e) =>
         ["submitted", "under_review", "pending", "draft"].includes(
           (e.status || "").toLowerCase()
         )
       );
       setPendingExps(pExps);
 
-      const pPlans = (plans || []).filter((p) =>
+      const pPlans = rawPlans.filter((p) =>
         ["pending", "draft", "optimized", "submitted"].includes(
           (p.approveStatus || "").toLowerCase()
         )
@@ -68,7 +83,7 @@ export default function DashboardScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [isResearcher, isManager, isAdmin, user?.userId]);
 
   useEffect(() => {
     loadData();

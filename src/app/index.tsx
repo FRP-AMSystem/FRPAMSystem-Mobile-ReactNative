@@ -21,7 +21,7 @@ export default function Index() {
     } else if (isResearcher) {
       router.replace("/(tabs)/experiments");
     } else if (isFieldStaff) {
-      router.replace("/(tabs)/equipment");
+      router.replace("/(tabs)/schedules");
     } else {
       router.replace("/(auth)/login");
     }

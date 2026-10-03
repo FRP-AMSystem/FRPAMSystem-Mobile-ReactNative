@@ -20,7 +20,15 @@ import { useAuth } from "../../context/AuthContext";
 import { styles } from "../../styles/experiments.styles";
 import { ExperimentItem, ExperimentStatus } from "../../types/experiment";
 
-type TabFilter = "all" | "Running" | "Draft" | "Pending" | "Approved" | "Completed";
+type TabFilter =
+  | "all"
+  | "Submitted"
+  | "Planning"
+  | "Ready"
+  | "Running"
+  | "Completed"
+  | "Draft"
+  | "Cancelled";
 
 function formatDate(dateStr?: string | null): string {
   if (!dateStr) return "-";
@@ -55,7 +63,13 @@ export default function ExperimentsScreen() {
       const data = await getExperiments(params);
       let list = data || [];
       if (isResearcher && !isManager && !isAdmin && user?.userId) {
-        list = list.filter((exp) => !exp.researcherId || exp.researcherId === user.userId);
+        list = list.filter((exp) => Number(exp.researcherId) === Number(user.userId));
+      }
+      if (isManager) {
+        list = list.filter((exp) => {
+          const st = String(exp.status || "").toLowerCase().trim();
+          return st !== "draft" && st !== "created" && st !== "0";
+        });
       }
       setExperiments(list);
     } catch (err: any) {
@@ -76,9 +90,32 @@ export default function ExperimentsScreen() {
     loadData();
   };
 
+  const filterTabs = useMemo(() => {
+    const tabs: { key: TabFilter; label: string }[] = [
+      { key: "all", label: "All" },
+      { key: "Submitted", label: "Submitted" },
+      { key: "Planning", label: "Planning" },
+      { key: "Ready", label: "Ready" },
+      { key: "Running", label: "Running" },
+      { key: "Completed", label: "Completed" },
+      { key: "Draft", label: "Draft" },
+      { key: "Cancelled", label: "Cancelled" },
+    ];
+    if (isManager) {
+      return tabs.filter((t) => t.key !== "Draft");
+    }
+    return tabs;
+  }, [isManager]);
+
   const filteredExperiments = useMemo(() => {
     return experiments.filter((item) => {
-      const matchesTab = tabFilter === "all" || item.status === tabFilter;
+      const st = String(item.status || "").toLowerCase().trim();
+      if (isManager && (st === "draft" || st === "created" || st === "0")) {
+        return false;
+      }
+      const matchesTab =
+        tabFilter === "all" ||
+        st === tabFilter.toLowerCase();
       if (!matchesTab) return false;
 
       if (!searchTerm.trim()) return true;
@@ -89,21 +126,29 @@ export default function ExperimentsScreen() {
 
       return name.includes(q) || desc.includes(q) || researcher.includes(q);
     });
-  }, [experiments, tabFilter, searchTerm]);
+  }, [experiments, tabFilter, searchTerm, isManager]);
 
   const getStatusBadge = (status?: ExperimentStatus) => {
-    switch (status) {
-      case "Running":
+    const st = String(status || "").toLowerCase().trim();
+    switch (st) {
+      case "submitted":
+      case "pending":
+        return { label: "Submitted", bg: "#fffbeb", text: "#b45309", border: "#fde68a" };
+      case "planning":
+        return { label: "Planning", bg: "#f5f3ff", text: "#7c3aed", border: "#ddd6fe" };
+      case "ready":
+      case "approved":
+        return { label: "Ready", bg: "#eff6ff", text: "#1d4ed8", border: "#bfdbfe" };
+      case "running":
+      case "inprogress":
         return { label: "Running", bg: "#f0fdf4", text: "#15803d", border: "#86efac" };
-      case "Approved":
-        return { label: "Approved", bg: "#eff6ff", text: "#1d4ed8", border: "#bfdbfe" };
-      case "Pending":
-        return { label: "Pending", bg: "#fffbeb", text: "#b45309", border: "#fde68a" };
-      case "Completed":
+      case "completed":
         return { label: "Completed", bg: "#faf5ff", text: "#7e22ce", border: "#e9d5ff" };
-      case "Rejected":
-        return { label: "Rejected", bg: "#fef2f2", text: "#b91c1c", border: "#fca5a5" };
-      case "Draft":
+      case "cancelled":
+      case "canceled":
+      case "rejected":
+        return { label: "Cancelled", bg: "#fef2f2", text: "#b91c1c", border: "#fca5a5" };
+      case "draft":
       default:
         return { label: "Draft", bg: "#f1f5f9", text: "#475569", border: "#cbd5e1" };
     }
@@ -154,14 +199,7 @@ export default function ExperimentsScreen() {
         style={styles.tabFilterScroll}
         contentContainerStyle={styles.tabFilterRow}
       >
-        {[
-          { key: "all", label: "All" },
-          { key: "Running", label: "Running" },
-          { key: "Draft", label: "Draft" },
-          { key: "Pending", label: "Pending" },
-          { key: "Approved", label: "Approved" },
-          { key: "Completed", label: "Completed" },
-        ].map((t) => (
+        {filterTabs.map((t) => (
           <TouchableOpacity
             key={t.key}
             style={[styles.tabFilterBtn, tabFilter === t.key && styles.tabFilterBtnActive]}

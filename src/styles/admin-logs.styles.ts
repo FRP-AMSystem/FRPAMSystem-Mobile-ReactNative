@@ -102,6 +102,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    gap: 8,
   },
   modulePill: {
     backgroundColor: "#eff6ff",
@@ -116,6 +117,19 @@ export const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#1d4ed8",
     textTransform: "uppercase",
+  },
+  statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+  },
+  statusBadgeText: {
+    fontSize: 11,
+    fontWeight: "700",
   },
   timestampText: {
     fontSize: 11.5,
@@ -144,11 +158,17 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+    flex: 1,
+    paddingRight: 8,
   },
   userNameText: {
     fontSize: 12,
     color: "#334155",
     fontWeight: "600",
+  },
+  roleTagText: {
+    fontSize: 11,
+    color: "#64748b",
   },
   viewDetailText: {
     fontSize: 12,

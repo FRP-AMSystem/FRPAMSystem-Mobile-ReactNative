@@ -7,7 +7,8 @@ export const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
-    padding: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
     backgroundColor: "#ffffff",
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
@@ -19,6 +20,7 @@ export const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
+    paddingBottom: 36,
   },
   userCard: {
     backgroundColor: "#ffffff",
@@ -30,9 +32,9 @@ export const styles = StyleSheet.create({
     marginBottom: 16,
   },
   avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 68,
+    height: 68,
+    borderRadius: 34,
     backgroundColor: Colors.primaryLight,
     borderWidth: 2,
     borderColor: Colors.primary,
@@ -46,15 +48,15 @@ export const styles = StyleSheet.create({
     color: Colors.primaryDark,
   },
   userName: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: "700",
     color: Colors.text,
   },
   userEmail: {
     fontSize: 13,
     color: Colors.textSecondary,
-    marginTop: 2,
-    marginBottom: 10,
+    marginTop: 3,
+    marginBottom: 12,
   },
   roleBadge: {
     flexDirection: "row",
@@ -72,19 +74,40 @@ export const styles = StyleSheet.create({
     fontWeight: "700",
     color: Colors.primaryDark,
   },
-  infoSection: {
+  sectionCard: {
     backgroundColor: "#ffffff",
     borderRadius: 14,
     padding: 16,
     borderWidth: 1,
     borderColor: Colors.border,
-    marginBottom: 20,
+    marginBottom: 16,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 14,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
+  },
+  sectionTitle: {
+    fontSize: 14.5,
+    fontWeight: "700",
+    color: Colors.text,
+  },
+  infoList: {
     gap: 12,
   },
   infoItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    justifyContent: "space-between",
+  },
+  infoLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   infoLabel: {
     fontSize: 13,
@@ -94,8 +117,11 @@ export const styles = StyleSheet.create({
     fontSize: 13.5,
     fontWeight: "600",
     color: Colors.text,
-    marginLeft: "auto",
+    textAlign: "right",
+    flexShrink: 1,
+    marginLeft: 12,
   },
+
   logoutBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -106,6 +132,7 @@ export const styles = StyleSheet.create({
     height: 48,
     borderRadius: 12,
     gap: 8,
+    marginTop: 4,
   },
   logoutBtnText: {
     fontSize: 14.5,

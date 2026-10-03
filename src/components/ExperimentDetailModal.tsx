@@ -26,6 +26,7 @@ import {
   getExperimentLandRequirements,
 } from "../api/experimentRequirementApi";
 import { AISuggestionModal } from "./AISuggestionModal";
+import { AllocateResourcesModal } from "./AllocateResourcesModal";
 import { RejectReasonModal } from "./RejectReasonModal";
 import { useAuth } from "../context/AuthContext";
 import { Colors } from "../constants/colors";
@@ -70,8 +71,9 @@ export function ExperimentDetailModal({
   // Reject modal
   const [rejectModalVisible, setRejectModalVisible] = useState(false);
 
-  // AI Modal
+  // AI Modal & Resource Allocation Modal
   const [aiModalVisible, setAiModalVisible] = useState(false);
+  const [allocateModalVisible, setAllocateModalVisible] = useState(false);
 
   useEffect(() => {
     if (visible && experiment?.experimentId) {
@@ -186,26 +188,33 @@ export function ExperimentDetailModal({
   };
 
   const getStatusBadge = (status?: ExperimentStatus) => {
-    switch (status) {
-      case "Running":
+    const st = String(status || "").toLowerCase().trim();
+    switch (st) {
+      case "submitted":
+      case "pending":
+        return { label: "Submitted", bg: "#fffbeb", text: "#b45309", border: "#fde68a" };
+      case "planning":
+        return { label: "Planning", bg: "#f5f3ff", text: "#7c3aed", border: "#ddd6fe" };
+      case "ready":
+      case "approved":
+        return { label: "Ready", bg: "#eff6ff", text: "#1d4ed8", border: "#bfdbfe" };
+      case "running":
+      case "inprogress":
         return { label: "Running", bg: "#f0fdf4", text: "#15803d", border: "#86efac" };
-      case "Approved":
-        return { label: "Approved", bg: "#eff6ff", text: "#1d4ed8", border: "#bfdbfe" };
-      case "Pending":
-        return { label: "Pending", bg: "#fffbeb", text: "#b45309", border: "#fde68a" };
-      case "Completed":
+      case "completed":
         return { label: "Completed", bg: "#faf5ff", text: "#7e22ce", border: "#e9d5ff" };
-      case "Rejected":
-        return { label: "Rejected", bg: "#fef2f2", text: "#b91c1c", border: "#fca5a5" };
-      case "Draft":
-      case "Created":
+      case "cancelled":
+      case "canceled":
+      case "rejected":
+        return { label: "Cancelled", bg: "#fef2f2", text: "#b91c1c", border: "#fca5a5" };
+      case "draft":
       default:
         return { label: "Draft", bg: "#f1f5f9", text: "#475569", border: "#cbd5e1" };
     }
   };
 
   const badge = getStatusBadge(experiment?.status);
-  const isDraft = experiment?.status === "Draft" || experiment?.status === "Created";
+  const isDraft = !experiment?.status || String(experiment.status).toLowerCase().trim() === "draft";
 
   return (
     <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={onClose}>
@@ -505,7 +514,7 @@ export function ExperimentDetailModal({
             ]}
           >
             {/* Manager / Admin Approval Actions */}
-            {(isManager || isAdmin) && experiment.status !== "Approved" && (
+            {(isManager || isAdmin) && (experiment.status === "Submitted" || String(experiment.status).toLowerCase() === "submitted") && (
               <View style={styles.managerActionBar}>
                 <TouchableOpacity
                   style={[styles.approveBtn, actionLoading && { opacity: 0.6 }]}
@@ -548,15 +557,27 @@ export function ExperimentDetailModal({
               </TouchableOpacity>
             ) : null}
 
-            {/* AI Optimization Action Button */}
-            <TouchableOpacity
-              style={styles.aiActionBtn}
-              onPress={() => setAiModalVisible(true)}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="sparkles" size={18} color="#ffffff" />
-              <Text style={styles.aiActionBtnText}>AI Allocation Optimizer (GA Solver)</Text>
-            </TouchableOpacity>
+            {/* When Planning or Ready: Allocate Resources Action Button */}
+            {(experiment.status === "Planning" || experiment.status === "Ready") ? (
+              <TouchableOpacity
+                style={styles.aiActionBtn}
+                onPress={() => setAllocateModalVisible(true)}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="cube-outline" size={18} color="#ffffff" />
+                <Text style={styles.aiActionBtnText}>Allocate Resources & AI Optimizer</Text>
+              </TouchableOpacity>
+            ) : (
+              /* AI Optimization Action Button for Drafts */
+              <TouchableOpacity
+                style={styles.aiActionBtn}
+                onPress={() => setAiModalVisible(true)}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="sparkles" size={18} color="#ffffff" />
+                <Text style={styles.aiActionBtnText}>AI Allocation Optimizer (GA Solver)</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
 
@@ -565,6 +586,19 @@ export function ExperimentDetailModal({
           visible={aiModalVisible}
           experiment={experiment}
           onClose={() => setAiModalVisible(false)}
+          onSuccess={() => {
+            onSuccess();
+            if (experiment?.experimentId) {
+              loadAllDetails(experiment.experimentId);
+            }
+          }}
+        />
+
+        {/* Resource Allocation & Manual Picker Modal */}
+        <AllocateResourcesModal
+          visible={allocateModalVisible}
+          experiment={experiment}
+          onClose={() => setAllocateModalVisible(false)}
           onSuccess={() => {
             onSuccess();
             if (experiment?.experimentId) {

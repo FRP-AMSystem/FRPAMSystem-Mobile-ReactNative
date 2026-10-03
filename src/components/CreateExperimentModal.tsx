@@ -156,7 +156,7 @@ export function CreateExperimentModal({
       });
       const fallbackRoles: RoleItem[] = [
         { roleId: 3, roleName: "Technician", name: "Technician", description: "" },
-        { roleId: 4, roleName: "Seasonal", name: "Seasonal Worker", description: "" },
+        { roleId: 4, roleName: "Seasonal", name: "Seasonal", description: "" },
       ];
       setRoles(fieldRoles.length > 0 ? fieldRoles : fallbackRoles);
     } catch (err) {

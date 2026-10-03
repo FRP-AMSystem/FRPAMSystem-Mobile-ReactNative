@@ -9,9 +9,10 @@ export interface UserItem {
   roleId?: number;
   roleName: Role | string;
   isActive?: boolean;
-  phoneNumber?: string;
   avatar?: string;
-  createdAt?: string;
+  phoneNumber?: string;
+  createdAt?: string | null;
+  updatedAt?: string | null;
   department?: string;
 }
 

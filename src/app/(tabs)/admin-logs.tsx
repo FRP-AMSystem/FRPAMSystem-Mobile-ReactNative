@@ -12,18 +12,20 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { getAuditLogs } from "../../api/auditLogApi";
 import { AuditLogItem } from "../../types/auditLog";
-import { AuditLogDetailModal } from "../../components/AuditLogDetailModal";
+import { AuditLogDetailModal, resolveLogSeverity } from "../../components/AuditLogDetailModal";
 import { Colors } from "../../constants/colors";
 import { styles } from "../../styles/admin-logs.styles";
 
 const MODULE_FILTERS = [
-  { key: "all", label: "All" },
-  { key: "Auth", label: "Auth" },
-  { key: "Experiment", label: "Experiment" },
-  { key: "AllocationPlan", label: "Allocation" },
-  { key: "Equipment", label: "Equipment" },
-  { key: "User", label: "User" },
-  { key: "Schedule", label: "Schedule" },
+  { key: "ALL", label: "All Modules" },
+  { key: "Experiments", label: "Experiments" },
+  { key: "ExperimentPhases", label: "Phases" },
+  { key: "ExperimentEquipmentRequirements", label: "Equipment Reqs" },
+  { key: "ExperimentHumanRequirements", label: "Human Reqs" },
+  { key: "ExperimentLandRequirements", label: "Land Reqs" },
+  { key: "AllocationPlans", label: "Allocation Plans" },
+  { key: "Auth", label: "Auth & Users" },
+  { key: "Notifications", label: "Notifications" },
 ];
 
 export default function AdminLogsScreen() {
@@ -32,7 +34,7 @@ export default function AdminLogsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
-  const [selectedModule, setSelectedModule] = useState("all");
+  const [selectedModule, setSelectedModule] = useState("ALL");
 
   // Detail Modal
   const [selectedLog, setSelectedLog] = useState<AuditLogItem | null>(null);
@@ -40,15 +42,22 @@ export default function AdminLogsScreen() {
 
   const loadLogs = useCallback(async () => {
     try {
-      const data = await getAuditLogs({ Size: 100 });
-      setLogs(data);
+      setLoading(true);
+      const res = await getAuditLogs({
+        page: 1,
+        pageSize: 100,
+        search: search.trim() || undefined,
+        module: selectedModule !== "ALL" ? selectedModule : undefined,
+      });
+      setLogs(res.items);
     } catch (err) {
       console.error("Load audit logs error:", err);
+      setLogs([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [search, selectedModule]);
 
   useEffect(() => {
     loadLogs();
@@ -60,29 +69,30 @@ export default function AdminLogsScreen() {
   };
 
   const filteredLogs = logs.filter((l) => {
+    const q = search.toLowerCase().trim();
+    if (!q) return true;
+
     const matchesSearch =
-      (l.action || "").toLowerCase().includes(search.toLowerCase()) ||
-      (l.module || "").toLowerCase().includes(search.toLowerCase()) ||
-      (l.userFullName || "").toLowerCase().includes(search.toLowerCase()) ||
-      (l.username || "").toLowerCase().includes(search.toLowerCase()) ||
-      (l.details || "").toLowerCase().includes(search.toLowerCase());
+      (l.action || "").toLowerCase().includes(q) ||
+      (l.module || "").toLowerCase().includes(q) ||
+      (l.actorFullName || "").toLowerCase().includes(q) ||
+      (l.actorUsername || "").toLowerCase().includes(q) ||
+      (l.actorRoleName || "").toLowerCase().includes(q) ||
+      (l.description || "").toLowerCase().includes(q) ||
+      (l.metadata || "").toLowerCase().includes(q);
 
-    const matchesModule =
-      selectedModule === "all" ||
-      (l.module || "").toLowerCase().includes(selectedModule.toLowerCase());
-
-    return matchesSearch && matchesModule;
+    return matchesSearch;
   });
 
   const formatTime = (timeStr?: string) => {
     if (!timeStr) return "";
     try {
       const d = new Date(timeStr);
-      return d.toLocaleTimeString("en-US", {
+      return d.toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
-        day: "2-digit",
-        month: "2-digit",
       });
     } catch {
       return timeStr;
@@ -98,9 +108,9 @@ export default function AdminLogsScreen() {
     >
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Audit Logs</Text>
+        <Text style={styles.title}>System Audit Logs</Text>
         <Text style={styles.subtitle}>
-          Monitor system operations and security events
+          Traceability and compliance monitoring of all system events & API activities
         </Text>
 
         {/* Module Filters */}
@@ -133,7 +143,7 @@ export default function AdminLogsScreen() {
           <Ionicons name="search" size={18} color="#94a3b8" />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search by action, user, module, details..."
+            placeholder="Search action, description, actor, or path..."
             placeholderTextColor="#94a3b8"
             value={search}
             onChangeText={setSearch}
@@ -150,7 +160,7 @@ export default function AdminLogsScreen() {
       {loading ? (
         <View style={styles.centerLoading}>
           <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={styles.loadingText}>Loading audit logs...</Text>
+          <Text style={styles.loadingText}>Loading audit logs from server...</Text>
         </View>
       ) : (
         <FlatList
@@ -174,6 +184,11 @@ export default function AdminLogsScreen() {
             </View>
           }
           renderItem={({ item }) => {
+            const sevInfo = resolveLogSeverity(item);
+            const actorName =
+              item.actorFullName || item.actorUsername || item.userFullName || item.username || "System / Anonymous";
+            const actorRole = item.actorRoleName || item.roleName;
+
             return (
               <TouchableOpacity
                 style={styles.logCard}
@@ -183,33 +198,65 @@ export default function AdminLogsScreen() {
                   setDetailModalVisible(true);
                 }}
               >
+                {/* Card Top: Module + Status Badge + Timestamp */}
                 <View style={styles.logCardTop}>
                   <View style={styles.modulePill}>
                     <Text style={styles.moduleText}>
                       {item.module || "General"}
                     </Text>
                   </View>
+
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      { backgroundColor: sevInfo.bg, borderColor: sevInfo.border },
+                    ]}
+                  >
+                    <Ionicons
+                      name={
+                        sevInfo.type === "success"
+                          ? "checkmark-circle"
+                          : sevInfo.type === "error"
+                          ? "close-circle"
+                          : sevInfo.type === "warning"
+                          ? "alert-circle"
+                          : "information-circle"
+                      }
+                      size={12}
+                      color={sevInfo.text}
+                    />
+                    <Text style={[styles.statusBadgeText, { color: sevInfo.text }]}>
+                      {sevInfo.label}
+                    </Text>
+                  </View>
+
                   <Text style={styles.timestampText}>
-                    {formatTime(item.timestamp || item.createdAt)}
+                    {formatTime(item.createdAt || item.timestamp)}
                   </Text>
                 </View>
 
-                <Text style={styles.actionTitle}>{item.action}</Text>
+                {/* Action Title */}
+                <Text style={styles.actionTitle}>{item.action || "Execute"}</Text>
 
-                {item.details ? (
+                {/* Description Snippet */}
+                {item.description ? (
                   <Text style={styles.detailsSnippet} numberOfLines={2}>
-                    {item.details}
+                    {item.description}
                   </Text>
                 ) : null}
 
+                {/* Card Footer: Actor & View Button */}
                 <View style={styles.logFooter}>
                   <View style={styles.userWrap}>
                     <Ionicons name="person-circle-outline" size={16} color="#64748b" />
-                    <Text style={styles.userNameText}>
-                      {item.userFullName || item.username || "System"}
+                    <Text style={styles.userNameText} numberOfLines={1}>
+                      {actorName}
                     </Text>
+                    {actorRole ? (
+                      <Text style={styles.roleTagText}>({actorRole})</Text>
+                    ) : null}
                   </View>
-                  <Text style={styles.viewDetailText}>Details →</Text>
+                  <Text style={styles.viewDetailText}>View →</Text>
                 </View>
               </TouchableOpacity>
             );

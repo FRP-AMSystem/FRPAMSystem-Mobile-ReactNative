@@ -59,7 +59,7 @@ export default function LoginScreen() {
       } else if (roleName === "Researcher") {
         router.replace("/(tabs)/experiments");
       } else {
-        router.replace("/(tabs)/equipment");
+        router.replace("/(tabs)/schedules");
       }
     } catch (err: any) {
       console.error(err);

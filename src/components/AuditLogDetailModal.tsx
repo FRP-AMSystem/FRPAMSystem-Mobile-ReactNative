@@ -18,6 +18,58 @@ interface AuditLogDetailModalProps {
   onClose: () => void;
 }
 
+function parseMetadata(metaStr?: string | null): Record<string, unknown> | null {
+  if (!metaStr) return null;
+  try {
+    return JSON.parse(metaStr);
+  } catch {
+    return { raw: metaStr };
+  }
+}
+
+export function resolveLogSeverity(log: AuditLogItem): {
+  label: string;
+  type: "success" | "info" | "warning" | "error";
+  bg: string;
+  text: string;
+  border: string;
+} {
+  const meta = parseMetadata(log.metadata);
+  const statusCode = Number(meta?.StatusCode ?? meta?.statusCode ?? 0);
+  const desc = log.description || "";
+
+  if (
+    (statusCode >= 200 && statusCode < 300) ||
+    desc.includes("Status 200") ||
+    desc.includes("Status 201")
+  ) {
+    return { label: "SUCCESS", type: "success", bg: "#f0fdf4", text: "#15803d", border: "#86efac" };
+  }
+  if (
+    statusCode >= 500 ||
+    desc.includes("Status 500") ||
+    desc.toLowerCase().includes("error")
+  ) {
+    return { label: "ERROR", type: "error", bg: "#fef2f2", text: "#b91c1c", border: "#fca5a5" };
+  }
+  if (
+    statusCode >= 400 ||
+    desc.includes("Status 40") ||
+    desc.toLowerCase().includes("warning")
+  ) {
+    return { label: "WARNING", type: "warning", bg: "#fffbeb", text: "#b45309", border: "#fde68a" };
+  }
+
+  const rawSev = (log.severity || "INFO").toUpperCase();
+  if (rawSev === "ERROR") {
+    return { label: "ERROR", type: "error", bg: "#fef2f2", text: "#b91c1c", border: "#fca5a5" };
+  }
+  if (rawSev === "WARNING" || rawSev === "WARN") {
+    return { label: "WARNING", type: "warning", bg: "#fffbeb", text: "#b45309", border: "#fde68a" };
+  }
+  return { label: "INFO", type: "info", bg: "#f0f9ff", text: "#0369a1", border: "#bae6fd" };
+}
+
 export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({
   visible,
   log,
@@ -27,34 +79,24 @@ export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({
 
   if (!log) return null;
 
-  const getSeverityStyle = (sev?: string) => {
-    switch ((sev || "").toLowerCase()) {
-      case "error":
-      case "critical":
-        return { bg: "#fee2e2", text: "#b91c1c", label: "Error" };
-      case "warning":
-        return { bg: "#fef3c7", text: "#d97706", label: "Warning" };
-      case "info":
-      default:
-        return { bg: "#e0f2fe", text: "#0284c7", label: "Info" };
-    }
-  };
+  const sevInfo = resolveLogSeverity(log);
+  const parsedMeta = parseMetadata(log.metadata);
 
-  const sevInfo = getSeverityStyle(log.severity);
-
-  const formatJson = (str?: string) => {
-    if (!str) return null;
-    try {
-      const parsed = JSON.parse(str);
-      return JSON.stringify(parsed, null, 2);
-    } catch {
-      return str;
-    }
-  };
-
-  const formattedTimestamp = log.timestamp || log.createdAt
-    ? new Date(log.timestamp || log.createdAt || "").toLocaleString("en-US")
+  const rawTime = log.createdAt || log.timestamp;
+  const formattedTimestamp = rawTime
+    ? new Date(rawTime).toLocaleString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      })
     : "Unknown";
+
+  const actorDisplay =
+    log.actorFullName || log.userFullName || log.actorUsername || log.username || "System / Automated";
+  const actorRole = log.actorRoleName || log.roleName;
 
   return (
     <Modal
@@ -79,10 +121,10 @@ export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.iconBox}>
-              <Ionicons name="shield-checkmark" size={22} color="#16a34a" />
+              <Ionicons name="terminal-outline" size={22} color="#16a34a" />
             </View>
             <View style={styles.headerTextWrap}>
-              <Text style={styles.title}>System Audit Log Details</Text>
+              <Text style={styles.title}>Audit Log Record #{log.auditLogId || log.id}</Text>
               <Text style={styles.subtitle}>{log.action || "Recorded Activity"}</Text>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
@@ -97,11 +139,11 @@ export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({
             {/* Meta Grid */}
             <View style={styles.metaGrid}>
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Severity</Text>
+                <Text style={styles.metaLabel}>Status / Severity</Text>
                 <View
                   style={[
                     styles.severityBadge,
-                    { backgroundColor: sevInfo.bg },
+                    { backgroundColor: sevInfo.bg, borderColor: sevInfo.border, borderWidth: 1 },
                   ]}
                 >
                   <Text style={[styles.severityText, { color: sevInfo.text }]}>
@@ -112,70 +154,53 @@ export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({
 
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Module</Text>
-                <Text style={styles.metaValue}>{log.module || "General System"}</Text>
+                <Text style={styles.metaValue}>{log.module || "General"}</Text>
               </View>
 
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Action</Text>
-                <Text style={styles.metaValue}>{log.action || "Operation"}</Text>
+                <Text style={styles.metaValue}>{log.action || "Execute"}</Text>
               </View>
 
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Actor</Text>
+                <Text style={styles.metaLabel}>Actor / User</Text>
                 <Text style={styles.metaValue}>
-                  {log.userFullName || log.username || "Automated System"}
+                  {actorDisplay} {actorRole ? `(${actorRole})` : ""}
                 </Text>
               </View>
-
-              {log.roleName ? (
-                <View style={styles.metaRow}>
-                  <Text style={styles.metaLabel}>Role</Text>
-                  <Text style={styles.metaValue}>{log.roleName}</Text>
-                </View>
-              ) : null}
 
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Timestamp</Text>
                 <Text style={styles.metaValue}>{formattedTimestamp}</Text>
               </View>
 
-              {log.ipAddress ? (
-                <View style={styles.metaRow}>
-                  <Text style={styles.metaLabel}>IP Address</Text>
-                  <Text style={styles.metaValue}>{log.ipAddress}</Text>
-                </View>
-              ) : null}
+              <View style={styles.metaRow}>
+                <Text style={styles.metaLabel}>Raw BE Severity</Text>
+                <Text style={[styles.metaValue, { color: "#64748b" }]}>
+                  {log.severity || "WARNING"}
+                </Text>
+              </View>
             </View>
 
-            {/* Details */}
-            {log.details ? (
-              <>
-                <Text style={styles.sectionTitle}>Description & Details</Text>
-                <View style={styles.detailsBox}>
-                  <Text style={styles.detailsText}>{log.details}</Text>
-                </View>
-              </>
-            ) : null}
+            {/* Description */}
+            <Text style={styles.sectionTitle}>Description</Text>
+            <View style={styles.detailsBox}>
+              <Text style={styles.detailsText}>
+                {log.description || log.details || "No description provided."}
+              </Text>
+            </View>
 
-            {/* New Values */}
-            {log.newValues ? (
+            {/* Request Payload & Metadata */}
+            {parsedMeta && (
               <>
-                <Text style={styles.sectionTitle}>Updated Data (Payload)</Text>
+                <Text style={styles.sectionTitle}>Request Payload & Metadata</Text>
                 <View style={styles.codeBlock}>
-                  <Text style={styles.codeText}>{formatJson(log.newValues)}</Text>
+                  <Text style={styles.codeText}>
+                    {JSON.stringify(parsedMeta, null, 2)}
+                  </Text>
                 </View>
               </>
-            ) : null}
-
-            {/* Old Values */}
-            {log.oldValues ? (
-              <>
-                <Text style={styles.sectionTitle}>Previous Data (Old Values)</Text>
-                <View style={styles.codeBlock}>
-                  <Text style={styles.codeText}>{formatJson(log.oldValues)}</Text>
-                </View>
-              </>
-            ) : null}
+            )}
 
             <TouchableOpacity
               style={styles.closeActionBtn}

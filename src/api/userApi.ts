@@ -52,6 +52,7 @@ export async function getUsers(params?: {
         avatar: item.avatar || "",
         department: item.department || "",
         createdAt: item.createdAt || item.created_at || null,
+        updatedAt: item.updatedAt || item.updated_at || null,
       };
     });
   } catch (err) {
@@ -94,6 +95,7 @@ export async function getUserById(id: number): Promise<UserItem> {
     avatar: item.avatar || "",
     department: item.department || "",
     createdAt: item.createdAt || item.created_at || null,
+    updatedAt: item.updatedAt || item.updated_at || null,
   };
 }
 
